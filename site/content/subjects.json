@@ -1,0 +1,76 @@
+{
+  "subjects": [
+    {
+      "id": "biology",
+      "short": "Bio",
+      "name": { "en": "Biology", "zh": "生物" },
+      "description": { "en": "Cells, membranes and enzymes — key terms in English and Chinese.", "zh": "细胞、细胞膜与酶 —— 中英双语关键词。" },
+      "formulaLabel": "Key equations",
+      "chapters": [
+        {
+          "id": "1",
+          "title": { "en": "Cell Biology", "zh": "细胞生物学" },
+          "topics": [
+            { "id": "1.1", "title": { "en": "Cell Structure", "zh": "细胞结构" }, "file": "1.1-cell-structure.md" },
+            { "id": "1.2", "title": { "en": "Movement Across Membranes", "zh": "物质的跨膜运输" }, "file": "1.2-membrane-transport.md" }
+          ]
+        },
+        {
+          "id": "2",
+          "title": { "en": "Biochemistry", "zh": "生物化学" },
+          "topics": [
+            { "id": "2.1", "title": { "en": "Enzymes", "zh": "酶" }, "file": "2.1-enzymes.md" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "physics",
+      "short": "Phy",
+      "name": { "en": "Physics", "zh": "物理" },
+      "description": { "en": "Mechanics and electricity with worked examples — bilingual terms.", "zh": "力学与电学，附例题 —— 中英双语关键词。" },
+      "formulaLabel": "Formula sheet",
+      "chapters": [
+        {
+          "id": "1",
+          "title": { "en": "Mechanics", "zh": "力学" },
+          "topics": [
+            { "id": "1.1", "title": { "en": "Kinematics", "zh": "运动学" }, "file": "1.1-kinematics.md" },
+            { "id": "1.2", "title": { "en": "Newton's Laws & Momentum", "zh": "牛顿运动定律与动量" }, "file": "1.2-newtons-laws.md" }
+          ]
+        },
+        {
+          "id": "2",
+          "title": { "en": "Electricity", "zh": "电学" },
+          "topics": [
+            { "id": "2.1", "title": { "en": "Current Electricity", "zh": "电流与电路" }, "file": "2.1-current-electricity.md" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cp",
+      "short": "CP",
+      "name": "Competitive Programming",
+      "description": "Algorithm notes, C++ templates and the complexity rules of thumb for Luogu, Codeforces and olympiads.",
+      "formulaLabel": "Cheat sheet",
+      "chapters": [
+        {
+          "id": "1",
+          "title": "Foundations",
+          "topics": [
+            { "id": "1.1", "title": "Complexity & Limits", "file": "1.1-complexity.md" }
+          ]
+        },
+        {
+          "id": "2",
+          "title": "Core Techniques",
+          "topics": [
+            { "id": "2.1", "title": "Prefix Sums & Difference Arrays", "file": "2.1-prefix-sums.md" },
+            { "id": "2.2", "title": "Binary Search", "file": "2.2-binary-search.md" }
+          ]
+        }
+      ]
+    }
+  ]
+}
