@@ -188,7 +188,7 @@ async function viewHome() {
     <section class="hero">
       <p class="eyebrow">Study hub</p>
       <h1>What are we studying today?</h1>
-      <p class="lede">Chapter notes, flashcards, quizzes that remember your mistakes, and formula sheets — all in one place.</p>
+      <p class="lede">Chapter notes, flashcards, quizzes that remember your mistakes, and a cheat sheet — all in one place.</p>
     </section>
     <div class="subject-grid">
       ${m.subjects.map(s => {
@@ -575,15 +575,6 @@ $('#search-form').addEventListener('submit', e => {
   const q = $('#search-input').value.trim();
   location.hash = '#/search/' + encodeURIComponent(q);
 });
-
-const zhBtn = $('#zh-toggle');
-const syncZh = () => zhBtn.setAttribute('aria-pressed', !document.documentElement.classList.contains('hide-zh'));
-zhBtn.addEventListener('click', () => {
-  const hide = document.documentElement.classList.toggle('hide-zh');
-  store.set('showZh', !hide);
-  syncZh();
-});
-syncZh();
 
 $('#theme-toggle').addEventListener('click', () => {
   const next = isDark() ? 'light' : 'dark';

@@ -1,12 +1,11 @@
 # Study Hub
 
-A personal study website for **Biology**, **Physics** and **Competitive Programming**, with:
+A personal study website for **Competitive Programming**, with:
 
 - **Chapter notes** — written in Markdown, with maths (KaTeX), diagrams (Mermaid) and highlighted C++ code
 - **Flashcards** — flip, then mark "Again" or "Got it"; keyboard shortcuts <kbd>Space</kbd> <kbd>1</kbd> <kbd>2</kbd>
 - **Quizzes** — multiple choice with explanations; wrong answers are saved so you can **review mistakes**
-- **Formula sheets** — one per subject, printable as PDF
-- **Bilingual terms** — Biology and Physics show English + 中文; the **中** button hides/shows the Chinese
+- **Cheat sheet** — complexity limits, STL reference and templates, printable as PDF
 - Search, progress tracking ("Mark as done"), dark mode, works on phones
 
 It is a static site (no build step), hosted free on GitHub Pages at
@@ -35,28 +34,26 @@ Everything lives in `site/content/`:
 ```
 site/content/
 ├── subjects.json          ← list of subjects, chapters and topics
-├── biology/
-│   ├── 1.1-cell-structure.md   ← one Markdown file per topic
-│   ├── formulas.md             ← the subject's formula sheet
-│   └── cards.json              ← flashcards + quiz questions
-├── physics/ …
-└── cp/ …
+└── cp/
+    ├── 1.1-complexity.md   ← one Markdown file per topic
+    ├── formulas.md         ← the cheat sheet
+    └── cards.json          ← flashcards + quiz questions
 ```
 
 ### Add a note
 
-1. Create a Markdown file, e.g. `site/content/biology/3.1-photosynthesis.md`.
+1. Create a Markdown file, e.g. `site/content/cp/2.3-two-pointers.md`.
 2. Register it in `site/content/subjects.json` under a chapter:
    ```json
-   { "id": "3.1", "title": { "en": "Photosynthesis", "zh": "光合作用" }, "file": "3.1-photosynthesis.md" }
+   { "id": "2.3", "title": "Two Pointers", "file": "2.3-two-pointers.md" }
    ```
 
 Inside notes you can use:
 
 | Write | You get |
 |---|---|
-| `{{Chloroplast\|叶绿体}}` | A bold term with its Chinese translation (hidden by the 中 button) |
-| `$E_k = \tfrac12 mv^2$` | Inline maths |
+| `{{Prefix sum\|前缀和}}` | A bold term with its Chinese translation |
+| `$O(n \log n)$` | Inline maths |
 | `$$ ... $$` | A displayed equation |
 | a ` ```mermaid ` code block | A flowchart / diagram |
 | a ` ```cpp ` code block | Highlighted C++ |
@@ -64,20 +61,20 @@ Inside notes you can use:
 
 ### Add flashcards and quiz questions
 
-In the subject's `cards.json`. Any text can be a plain string (English only) or `{ "en": ..., "zh": ... }`:
+In `site/content/cp/cards.json`. Text can use `code`, **bold** and `$maths$`. Any text can also be `{ "en": ..., "zh": ... }` to show both languages:
 
 ```json
 {
   "flashcards": [
-    { "topic": "3.1", "front": { "en": "Where does photosynthesis happen?", "zh": "光合作用在哪里进行？" },
-      "back": { "en": "In the chloroplasts.", "zh": "在叶绿体中。" } }
+    { "topic": "2.3", "front": "When do two pointers work?",
+      "back": "When moving one pointer forward never requires moving the other one back." }
   ],
   "quiz": [
-    { "id": "bio-photo-1", "topic": "3.1",
-      "q": "Which gas is released by photosynthesis?",
-      "options": ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"],
+    { "id": "cp-2ptr-1", "topic": "2.3",
+      "q": "What is the complexity of the two-pointer sweep?",
+      "options": ["$O(n^2)$", "$O(n)$", "$O(\\log n)$", "$O(n \\log n)$"],
       "answer": 1,
-      "explain": "Oxygen is released as a by-product." }
+      "explain": "Each pointer moves at most $n$ times in total." }
   ]
 }
 ```
