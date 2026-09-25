@@ -127,6 +127,7 @@ async function enhance(el) {
     code.parentElement.replaceWith(d);
     return d;
   });
+  $$('a[href^="http"]', el).forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
   if (window.hljs) $$('pre code', el).forEach(c => hljs.highlightElement(c));
   if (window.renderMathInElement) {
     renderMathInElement(el, {
@@ -177,7 +178,7 @@ const crumbs = items => `<nav class="crumbs" aria-label="Breadcrumb">${items
   .join('<span aria-hidden="true">/</span>')}</nav>`;
 
 function setTitle(...parts) {
-  document.title = [...parts, 'Study Hub'].filter(Boolean).join(' · ');
+  document.title = [...parts, 'CP Learning Hub'].filter(Boolean).join(' · ');
 }
 
 async function viewHome() {
@@ -186,9 +187,9 @@ async function viewHome() {
   setTitle();
   app.innerHTML = `
     <section class="hero">
-      <p class="eyebrow">Study hub</p>
-      <h1>What are we studying today?</h1>
-      <p class="lede">Chapter notes, flashcards, quizzes that remember your mistakes, and a cheat sheet — all in one place.</p>
+      <p class="eyebrow">CP Learning Hub</p>
+      <h1>What are we solving today?</h1>
+      <p class="lede">Algorithm notes, solved Luogu problems with full C++ code, flashcards, quizzes that remember your mistakes, and a cheat sheet.</p>
     </section>
     <div class="subject-grid">
       ${m.subjects.map(s => {

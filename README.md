@@ -1,8 +1,10 @@
-# Study Hub
+# CP Learning Hub
 
 A personal study website for **Competitive Programming**, with:
 
 - **Chapter notes** — written in Markdown, with maths (KaTeX), diagrams (Mermaid) and highlighted C++ code
+- **Solved problems** — Luogu P5730, P1028, P1002, P1044 and high-precision arithmetic, each with the idea, full tested C++ code, the sample, and a link to its interactive trace
+- **Link shelf** — 46 judges, guides, references, libraries and tools
 - **Flashcards** — flip, then mark "Again" or "Got it"; keyboard shortcuts <kbd>Space</kbd> <kbd>1</kbd> <kbd>2</kbd>
 - **Quizzes** — multiple choice with explanations; wrong answers are saved so you can **review mistakes**
 - **Cheat sheet** — complexity limits, STL reference and templates, printable as PDF
@@ -36,6 +38,7 @@ site/content/
 ├── subjects.json          ← list of subjects, chapters and topics
 └── cp/
     ├── 1.1-complexity.md   ← one Markdown file per topic
+    ├── 3.1-p5730-display.md ← solved problems (chapter 3)
     ├── formulas.md         ← the cheat sheet
     └── cards.json          ← flashcards + quiz questions
 ```

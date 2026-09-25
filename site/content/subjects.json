@@ -4,7 +4,7 @@
       "id": "cp",
       "short": "CP",
       "name": "Competitive Programming",
-      "description": "Algorithm notes, C++ templates and the complexity rules of thumb for Luogu, Codeforces and olympiads.",
+      "description": "Algorithm notes, solved Luogu problems with full C++ code, and the complexity rules of thumb for Luogu, Codeforces and olympiads.",
       "formulaLabel": "Cheat sheet",
       "chapters": [
         {
@@ -31,6 +31,48 @@
               "id": "2.2",
               "title": "Binary Search",
               "file": "2.2-binary-search.md"
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "title": "Solved Problems",
+          "topics": [
+            {
+              "id": "3.1",
+              "title": "P5730 显示屏 — LCD Digits",
+              "file": "3.1-p5730-display.md"
+            },
+            {
+              "id": "3.2",
+              "title": "P1028 数的计算 — Half Prefix",
+              "file": "3.2-p1028-count.md"
+            },
+            {
+              "id": "3.3",
+              "title": "P1002 过河卒 — River Pawn",
+              "file": "3.3-p1002-river-pawn.md"
+            },
+            {
+              "id": "3.4",
+              "title": "P1044 栈 — Stack Permutations",
+              "file": "3.4-p1044-stack.md"
+            },
+            {
+              "id": "3.5",
+              "title": "High-Precision Arithmetic 高精度",
+              "file": "3.5-bignum.md"
+            }
+          ]
+        },
+        {
+          "id": "4",
+          "title": "Resources",
+          "topics": [
+            {
+              "id": "4.1",
+              "title": "Link Shelf",
+              "file": "4.1-link-shelf.md"
             }
           ]
         }
