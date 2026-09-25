@@ -1,0 +1,951 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>高精度运算演示</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#e9edf1; --surface:#ffffff; --surface-2:#d9e0e6;
+  --ink:#16202b; --ink-dim:#55636f; --border:#c3ccd4;
+  --accent:#c07f0a; --accent-ink:#3a2a04;
+  --mult:#5b5fd6; --mult-ink:#ffffff;
+  --settle:#2f8f6f; --settle-ink:#ffffff;
+  --shadow: 0 1px 2px rgba(20,30,40,.06), 0 8px 24px -12px rgba(20,30,40,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161c; --surface:#1a2028; --surface-2:#242c37;
+    --ink:#e7ecf2; --ink-dim:#93a1ae; --border:#333e4a;
+    --accent:#e8ab2c; --accent-ink:#241a02;
+    --mult:#8890f2; --mult-ink:#12142b;
+    --settle:#49b891; --settle-ink:#052018;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161c; --surface:#1a2028; --surface-2:#242c37;
+  --ink:#e7ecf2; --ink-dim:#93a1ae; --border:#333e4a;
+  --accent:#e8ab2c; --accent-ink:#241a02;
+  --mult:#8890f2; --mult-ink:#12142b;
+  --settle:#49b891; --settle-ink:#052018;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Work Sans",system-ui,sans-serif;
+  padding:0 20px; padding-block:40px 64px;
+}
+.wrap{max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:36px;}
+
+h1{
+  font-family:"Fraunces",Georgia,serif; font-weight:600;
+  font-size:clamp(1.8rem,4vw,2.5rem); margin:0 0 8px; text-wrap:balance;
+}
+.lede{color:var(--ink-dim); max-width:62ch; line-height:1.6; margin:0;}
+header .eyebrow{
+  font-family:"JetBrains Mono",monospace; font-size:.72rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 10px; font-weight:700;
+}
+
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  box-shadow:var(--shadow); padding:26px 26px 28px; display:flex; flex-direction:column; gap:18px;
+}
+.card h2{
+  font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.35rem; margin:0; text-wrap:balance;
+}
+.card p.desc{color:var(--ink-dim); line-height:1.65; margin:0; max-width:70ch; font-size:.95rem;}
+.card p.desc code{
+  font-family:"JetBrains Mono",monospace; background:var(--surface-2); padding:1px 5px;
+  border-radius:5px; font-size:.85em;
+}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;}
+.field{display:flex; flex-direction:column; gap:4px;}
+.field label{font-size:.72rem; color:var(--ink-dim); letter-spacing:.04em;}
+.field input{
+  font-family:"JetBrains Mono",monospace; font-size:1rem; padding:7px 10px; width:150px;
+  border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
+}
+.field input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+.btnrow{display:flex; gap:8px; margin-left:auto;}
+button{
+  font-family:"Work Sans",sans-serif; font-weight:500; font-size:.88rem;
+  border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
+  padding:8px 14px; border-radius:8px; cursor:pointer;
+}
+button:hover{filter:brightness(1.06);}
+button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+button.primary{background:var(--accent); color:var(--accent-ink); border-color:transparent;}
+button:disabled{opacity:.45; cursor:not-allowed;}
+
+.stagegrid{display:grid; grid-template-columns:minmax(220px,340px) 1fr; gap:16px; align-items:start;}
+@media (max-width:720px){ .stagegrid{grid-template-columns:1fr;} }
+
+.codepanel{
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:14px 6px; font-family:"JetBrains Mono",monospace; font-size:.78rem; line-height:1.7;
+  overflow-x:auto;
+}
+.codeline{
+  padding:1px 10px; white-space:pre; border-radius:4px; color:var(--ink-dim);
+  transition:background .18s, color .18s;
+}
+.codeline .op{color:var(--ink);}
+.codeline.acc{background:var(--mult); color:var(--mult-ink);}
+.codeline.acc .op{color:var(--mult-ink);}
+.codeline.carry{background:var(--accent); color:var(--accent-ink);}
+.codeline.carry .op{color:var(--accent-ink);}
+.codehead{
+  font-size:.68rem; color:var(--ink-dim); letter-spacing:.08em; text-transform:uppercase;
+  margin:0 0 8px 10px; font-family:"JetBrains Mono",monospace;
+}
+.codegap{height:10px;}
+
+.varpanel{
+  margin-top:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:4px 14px;
+}
+.varrow{
+  display:flex; justify-content:space-between; gap:10px; padding:5px 0;
+  border-bottom:1px dashed var(--border); font-family:"JetBrains Mono",monospace; font-size:.82rem;
+}
+.varrow:last-child{border-bottom:none;}
+.varname{color:var(--ink-dim);}
+.varval{font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink);}
+.varval.empty{color:var(--ink-dim); font-weight:400; opacity:.45;}
+
+.stage{
+  background:var(--surface-2); border-radius:10px; padding:20px;
+  overflow-x:auto;
+}
+.rowlabel{
+  font-size:.72rem; color:var(--ink-dim); letter-spacing:.06em; text-transform:uppercase;
+  margin-bottom:6px; font-family:"JetBrains Mono",monospace;
+}
+.digits{display:flex; gap:6px; justify-content:flex-end; min-width:max-content;}
+.cell{
+  width:38px; height:44px; display:flex; align-items:center; justify-content:center;
+  font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; font-weight:500;
+  font-size:1.15rem; border-radius:7px; background:var(--surface); border:1px solid var(--border);
+  transition:background .25s, color .25s, transform .25s, border-color .25s;
+}
+.cell.ghost{opacity:.25; border-style:dashed;}
+.cell.active{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); transform:translateY(-3px);}
+.cell.settled{background:var(--settle); color:var(--settle-ink); border-color:var(--settle);}
+.cell.mult{background:var(--mult); color:var(--mult-ink); border-color:var(--mult);}
+
+.carrytrack{height:26px; display:flex; align-items:center; justify-content:flex-end; gap:6px; min-width:max-content;}
+.carrychip{
+  width:38px; text-align:center; font-family:"JetBrains Mono",monospace; font-size:.78rem;
+  color:var(--accent); font-weight:700; opacity:0; transform:translateY(4px);
+  transition:opacity .25s, transform .25s;
+}
+.carrychip.show{opacity:1; transform:translateY(0);}
+
+.status{
+  font-family:"JetBrains Mono",monospace; font-size:.86rem; color:var(--ink-dim);
+  min-height:1.4em;
+}
+.status b{color:var(--ink); font-weight:600;}
+
+.buckets{display:flex; gap:8px; justify-content:flex-end; min-width:max-content; align-items:flex-end;}
+.bucket{display:flex; flex-direction:column; align-items:center; gap:6px; width:52px;}
+.bucket .val{
+  font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; font-size:.95rem;
+  width:100%; text-align:center; padding:6px 0; border-radius:7px;
+  background:var(--surface); border:1px solid var(--border); transition:all .25s; min-height:1.3em;
+}
+.bucket .val.hot{background:var(--mult); color:var(--mult-ink); border-color:var(--mult);}
+.bucket .val.settled{background:var(--settle); color:var(--settle-ink); border-color:var(--settle);}
+.bucket .idx{font-size:.68rem; color:var(--ink-dim); font-family:"JetBrains Mono",monospace;}
+
+.pairline{
+  font-family:"JetBrains Mono",monospace; font-size:.86rem; color:var(--ink-dim);
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.pairline b{color:var(--mult);}
+
+.remreadout{margin-top:16px; display:flex; align-items:center; gap:12px;}
+.remreadout .lbl{
+  font-size:.72rem; color:var(--ink-dim); letter-spacing:.06em; text-transform:uppercase;
+  font-family:"JetBrains Mono",monospace;
+}
+.remreadout .val{
+  font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; font-weight:700;
+  font-size:1.25rem; padding:6px 16px; border-radius:8px; background:var(--surface);
+  border:1px solid var(--border); color:var(--ink); transition:background .2s, color .2s, border-color .2s;
+}
+.remreadout .val.settled{background:var(--settle); color:var(--settle-ink); border-color:var(--settle);}
+
+footer{color:var(--ink-dim); font-size:.82rem; text-align:center; line-height:1.7;}
+footer code{font-family:"JetBrains Mono",monospace; background:var(--surface-2); padding:1px 5px; border-radius:5px;}
+
+@media (max-width:480px){
+  .cell{width:30px; height:38px; font-size:1rem;}
+  .field input{width:120px;}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Competitive Programming · 高精度</p>
+    <h1>高精度运算：逐位处理与进位传播</h1>
+    <p class="lede">
+      当整数超出 <code style="font-family:'JetBrains Mono',monospace">long long</code> 的范围（约 9.2×10¹⁸）时，
+      需要用数组按位模拟竖式运算 —— 这就是「高精度」（bignum）。下面四个演示分别对应
+      <code style="font-family:'JetBrains Mono',monospace">bignum.cpp</code> 中的 <code style="font-family:'JetBrains Mono',monospace">add()</code>、
+      <code style="font-family:'JetBrains Mono',monospace">sub()</code>、
+      <code style="font-family:'JetBrains Mono',monospace">mul()</code> 与 <code style="font-family:'JetBrains Mono',monospace">divInt()</code>
+      函数，逐行执行代码、逐步展示进位/借位/余数是如何产生和传播的，右侧同步显示每个变量当前的值。
+    </p>
+  </header>
+
+  <section class="card" id="addCard">
+    <h2>① 高精度加法 — 逐位相加 + 进位传播</h2>
+    <p class="desc">
+      从最低位（个位）开始，每一位把两个加数的对应数字与上一位传来的进位相加，
+      结果对 10 取模作为当前位，商作为新的进位传给下一位。对应代码：
+      <code>s = x + y + carry; c[i] = s % 10; carry = s / 10;</code>
+    </p>
+    <div class="controls">
+      <div class="field"><label for="a1">被加数</label><input id="a1" value="4573689" maxlength="9" inputmode="numeric"></div>
+      <div class="field"><label for="b1">加数</label><input id="b1" value="89256" maxlength="9" inputmode="numeric"></div>
+      <div class="btnrow">
+        <button id="add-reset">↺ 重置</button>
+        <button id="add-step">⏭ 单步</button>
+        <button id="add-play" class="primary">▶ 播放</button>
+      </div>
+    </div>
+    <div class="stagegrid">
+      <div>
+        <p class="codehead">bignum.cpp · add()</p>
+        <div class="codepanel" id="add-code"></div>
+        <div class="varpanel" id="add-vars"></div>
+      </div>
+      <div class="stage">
+        <div class="carrytrack" id="add-carrytrack"></div>
+        <div class="rowlabel">被加数</div>
+        <div class="digits" id="add-rowA"></div>
+        <div class="rowlabel" style="margin-top:8px">加数</div>
+        <div class="digits" id="add-rowB"></div>
+        <div class="rowlabel" style="margin-top:8px">结果（sum）</div>
+        <div class="digits" id="add-rowC"></div>
+      </div>
+    </div>
+    <p class="status" id="add-status">点击「单步」或「播放」开始逐位相加。</p>
+  </section>
+
+  <section class="card" id="mulCard">
+    <h2>② 高精度乘法 — 累加到 c[i+j]，最后统一进位</h2>
+    <p class="desc">
+      竖式乘法把每一对数字 <code>a[i]·b[j]</code> 累加到结果数组的第 <code>i+j</code> 位（「桶」），
+      所有乘积都先不进位地堆在桶里，直到双重循环结束，才做<b>一次</b>从低位到高位的统一进位。
+      这正是它比逐次做加法更快的关键。
+    </p>
+    <div class="controls">
+      <div class="field"><label for="a2">被乘数</label><input id="a2" value="683" maxlength="4" inputmode="numeric"></div>
+      <div class="field"><label for="b2">乘数</label><input id="b2" value="94" maxlength="3" inputmode="numeric"></div>
+      <div class="btnrow">
+        <button id="mul-reset">↺ 重置</button>
+        <button id="mul-step">⏭ 单步</button>
+        <button id="mul-play" class="primary">▶ 播放</button>
+      </div>
+    </div>
+    <div class="stagegrid">
+      <div>
+        <p class="codehead">bignum.cpp · mul()</p>
+        <div class="codepanel" id="mul-code"></div>
+        <div class="varpanel" id="mul-vars"></div>
+      </div>
+      <div class="stage">
+        <div class="rowlabel">被乘数 a</div>
+        <div class="digits" id="mul-rowA"></div>
+        <div class="rowlabel" style="margin-top:8px">乘数 b</div>
+        <div class="digits" id="mul-rowB"></div>
+        <div class="pairline" id="mul-pairline">&nbsp;</div>
+        <div class="rowlabel" style="margin-top:14px">结果桶 c[i+j]（进位前 → 进位后）</div>
+        <div class="buckets" id="mul-buckets"></div>
+      </div>
+    </div>
+    <p class="status" id="mul-status">点击「单步」逐对累加 a[i]·b[j]，累加完成后再统一进位。</p>
+  </section>
+
+  <section class="card" id="subCard">
+    <h2>③ 高精度减法 — 逐位相减 + 借位传播</h2>
+    <p class="desc">
+      先用 <code>cmpAbs</code> 比较两数绝对值大小，保证从大数里减小数；再从最低位开始相减，
+      不够减就向被减数当前位先扣 1（<code>s += 10; borrow = 1;</code>），差值留到本位，
+      借位传给下一位。对应代码：
+      <code>s = x - y; if (s &lt; 0) { s += 10; borrow = 1; }</code>
+    </p>
+    <div class="controls">
+      <div class="field"><label for="a3">被减数</label><input id="a3" value="100000" maxlength="9" inputmode="numeric"></div>
+      <div class="field"><label for="b3">减数</label><input id="b3" value="1" maxlength="9" inputmode="numeric"></div>
+      <div class="btnrow">
+        <button id="sub-reset">↺ 重置</button>
+        <button id="sub-step">⏭ 单步</button>
+        <button id="sub-play" class="primary">▶ 播放</button>
+      </div>
+    </div>
+    <div class="stagegrid">
+      <div>
+        <p class="codehead">bignum.cpp · sub()</p>
+        <div class="codepanel" id="sub-code"></div>
+        <div class="varpanel" id="sub-vars"></div>
+      </div>
+      <div class="stage">
+        <div class="carrytrack" id="sub-borrowtrack"></div>
+        <div class="rowlabel">被减数（较大者）</div>
+        <div class="digits" id="sub-rowA"></div>
+        <div class="rowlabel" style="margin-top:8px">减数（较小者）</div>
+        <div class="digits" id="sub-rowB"></div>
+        <div class="rowlabel" style="margin-top:8px">结果（difference）</div>
+        <div class="digits" id="sub-rowC"></div>
+      </div>
+    </div>
+    <p class="status" id="sub-status">点击「单步」或「播放」开始逐位相减。</p>
+  </section>
+
+  <section class="card" id="divCard">
+    <h2>④ 高精度除法（除以低精度）— 从高位到低位试除</h2>
+    <p class="desc">
+      和加减法方向相反：除法从<b>最高位</b>开始往低位走。把当前累积的余数左移一位（乘 10）
+      再接上这一位的数字，得到 <code>cur</code>；<code>cur</code> 除以除数 <code>m</code> 的商就是这一位的答案，
+      余数则带去参与下一位的计算——是一种反方向的「借位」式传播。对应代码：
+      <code>cur = r*10 + a.d[i]; c.d[i] = cur/m; r = cur%m;</code>
+    </p>
+    <div class="controls">
+      <div class="field"><label for="a4">被除数</label><input id="a4" value="9876543210" maxlength="10" inputmode="numeric"></div>
+      <div class="field"><label for="m4">除数（低精度）</label><input id="m4" value="37" maxlength="6" inputmode="numeric"></div>
+      <div class="btnrow">
+        <button id="div-reset">↺ 重置</button>
+        <button id="div-step">⏭ 单步</button>
+        <button id="div-play" class="primary">▶ 播放</button>
+      </div>
+    </div>
+    <div class="stagegrid">
+      <div>
+        <p class="codehead">bignum.cpp · divInt()</p>
+        <div class="codepanel" id="div-code"></div>
+        <div class="varpanel" id="div-vars"></div>
+      </div>
+      <div class="stage">
+        <div class="rowlabel">被除数 a（从最高位开始处理 →）</div>
+        <div class="digits" id="div-rowA"></div>
+        <div class="rowlabel" style="margin-top:8px">商 c（quotient）</div>
+        <div class="digits" id="div-rowC"></div>
+        <div class="remreadout" id="div-rem"></div>
+      </div>
+    </div>
+    <p class="status" id="div-status">点击「单步」或「播放」开始逐位试除。</p>
+  </section>
+
+  <footer>
+    加法 / 减法 / 除法（除以低精度）<code>O(n)</code>，乘法（竖式）<code>O(n·m)</code> ——
+    对上千位的高精度数已经足够；更大规模可用 NTT/FFT 优化到 <code>O(n log n)</code>。
+    完整代码见随附的 <code>bignum.cpp</code>。
+  </footer>
+</div>
+
+<script>
+function digitsOf(str){ return str.split('').reverse().map(Number); }
+function makeCell(text, cls){
+  const d = document.createElement('div');
+  d.className = 'cell' + (cls ? ' '+cls : '');
+  d.textContent = text;
+  return d;
+}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+
+/* ---------------- Code panels: real source lines, highlighted per step ---------------- */
+function renderCode(containerId, lines){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  lines.forEach((l,idx)=>{
+    const div = document.createElement('div');
+    div.id = containerId+'-l'+idx;
+    if (l === ''){ div.className = 'codegap'; }
+    else { div.className = 'codeline'; div.textContent = l; }
+    el.appendChild(div);
+  });
+}
+function setCodeHighlight(containerId, activeIdxs, cls){
+  const el = document.getElementById(containerId);
+  Array.from(el.children).forEach((c,idx)=>{
+    c.classList.remove('acc','carry');
+    if (activeIdxs && activeIdxs.includes(idx)) c.classList.add(cls);
+  });
+}
+/* rows: [name, value] — value undefined/null renders as a dimmed placeholder (not yet computed) */
+function renderVars(containerId, rows){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  rows.forEach(([name,val])=>{
+    const row = document.createElement('div');
+    row.className = 'varrow';
+    const known = val !== undefined && val !== null;
+    row.innerHTML = `<span class="varname">${name}</span><span class="varval${known?'':' empty'}">${known?val:'—'}</span>`;
+    el.appendChild(row);
+  });
+}
+
+const ADD_CODE = [
+  'for (int i = 0; i < n; i++) {',
+  '    int x = 0;',
+  '    if (i < a.d.size()) x = a.d[i];',
+  '',
+  '    int y = 0;',
+  '    if (i < b.d.size()) y = b.d[i];',
+  '',
+  '    int s = x + y + carry;',
+  '    c.d[i] = s % 10;',
+  '    carry = s / 10;',
+  '}',
+  'c.d[n] = carry;',
+];
+/* one micro-step per meaningful line — the two blank spacer lines (3, 6) and the
+   closing brace (10) are never steps, matching the "no ternary" version's real flow */
+const ADD_STEP_LINES = [0, 1, 2, 4, 5, 7, 8, 9];
+const ADD_FINAL_LINE = [11];
+
+const MUL_CODE = [
+  'for (int i = 0; i < a.d.size(); i++)',
+  '  for (int j = 0; j < b.d.size(); j++)',
+  '    c.d[i+j] += a.d[i] * b.d[j];',
+  '',
+  'for (int i = 0; i+1 < c.d.size(); i++) {',
+  '  c.d[i+1] += c.d[i] / 10;',
+  '  c.d[i] %= 10;',
+  '}',
+];
+/* ---------------- Addition demo ---------------- */
+const addEls = {
+  a: document.getElementById('a1'), b: document.getElementById('b1'),
+  rowA: document.getElementById('add-rowA'), rowB: document.getElementById('add-rowB'),
+  rowC: document.getElementById('add-rowC'), track: document.getElementById('add-carrytrack'),
+  status: document.getElementById('add-status'),
+  step: document.getElementById('add-step'), play: document.getElementById('add-play'),
+  reset: document.getElementById('add-reset'),
+};
+let addState = null, addTimer = null;
+
+function buildAdd(){
+  const sa = (addEls.a.value.replace(/\D/g,'') || '0');
+  const sb = (addEls.b.value.replace(/\D/g,'') || '0');
+  const A = digitsOf(sa), B = digitsOf(sb);
+  const n = Math.max(A.length, B.length);
+  const result = new Array(n+1).fill(null);
+  addState = { A, B, n, result, i:0, sub:0, carry:0, scratch:{}, done:false };
+  renderCode('add-code', ADD_CODE);
+  renderAdd();
+  renderVars('add-vars', [['i',undefined],['carry (in)',undefined],['x',undefined],['y',undefined],['s',undefined],['c.d[i]',undefined],['carry (out)',undefined]]);
+  addEls.status.innerHTML = '准备就绪，共 ' + n + ' 位。点击「单步」逐行执行 add()。';
+}
+
+function renderAdd(){
+  const {A,B,n,result,i} = addState;
+  addEls.rowA.innerHTML=''; addEls.rowB.innerHTML=''; addEls.rowC.innerHTML=''; addEls.track.innerHTML='';
+  for (let k=n; k>=0; k--){
+    const chip = document.createElement('div');
+    chip.className = 'carrychip';
+    addEls.track.appendChild(chip);
+  }
+  for (let k=n-1; k>=0; k--){
+    const av = k<A.length ? A[k] : null;
+    const cellA = av===null ? makeCell('','ghost') : makeCell(av, k===i && !addState.done ? 'active':'');
+    addEls.rowA.appendChild(cellA);
+    const bv = k<B.length ? B[k] : null;
+    const cellB = bv===null ? makeCell('','ghost') : makeCell(bv, k===i && !addState.done ? 'active':'');
+    addEls.rowB.appendChild(cellB);
+  }
+  for (let k=n; k>=0; k--){
+    const rv = result[k];
+    let cls = '';
+    if (rv !== null) cls = 'settled';
+    addEls.rowC.appendChild(makeCell(rv===null?'':rv, cls));
+  }
+}
+
+function stepAdd(){
+  if (!addState || addState.done) return;
+  const st = addState;
+
+  if (st.i >= st.n){
+    st.result[st.n] = st.carry;
+    st.done = true;
+    setCodeHighlight('add-code', ADD_FINAL_LINE, 'carry');
+    renderVars('add-vars', [['n', st.n], ['carry', st.carry], ['c.d[n]', st.carry]]);
+    addEls.status.innerHTML = `循环结束，最高位补上剩余进位。完成！结果为 <b>${resultToString(st.result)}</b>`;
+    renderAdd();
+    stopAddPlay();
+    return;
+  }
+
+  const i = st.i, sub = st.sub;
+  if (sub === 0) st.scratch = { carryIn: st.carry };
+  const sc = st.scratch;
+  setCodeHighlight('add-code', [ADD_STEP_LINES[sub]], 'carry');
+
+  if (sub === 0){
+    addEls.status.innerHTML = `进入第 <b>${i+1}</b> 位（i=${i}），携带上一位的 carry = ${sc.carryIn}`;
+  } else if (sub === 1){
+    sc.x = 0;
+    addEls.status.innerHTML = `x 先设为默认值 <b>0</b>（假设 a 在这一位已经没有数字）`;
+  } else if (sub === 2){
+    const inRange = i < st.A.length;
+    if (inRange) sc.x = st.A[i];
+    addEls.status.innerHTML = inRange
+      ? `i=${i} 在 a.d 范围内，所以 x = a.d[${i}] = <b>${sc.x}</b>`
+      : `i=${i} 超出了 a.d 的范围（a 这一位没有数字了），x 保持默认值 <b>0</b>`;
+  } else if (sub === 3){
+    sc.y = 0;
+    addEls.status.innerHTML = `y 先设为默认值 <b>0</b>（假设 b 在这一位已经没有数字）`;
+  } else if (sub === 4){
+    const inRange = i < st.B.length;
+    if (inRange) sc.y = st.B[i];
+    addEls.status.innerHTML = inRange
+      ? `i=${i} 在 b.d 范围内，所以 y = b.d[${i}] = <b>${sc.y}</b>`
+      : `i=${i} 超出了 b.d 的范围（b 这一位没有数字了），y 保持默认值 <b>0</b>`;
+  } else if (sub === 5){
+    sc.s = sc.x + sc.y + sc.carryIn;
+    addEls.status.innerHTML = `s = x + y + carry = ${sc.x} + ${sc.y} + ${sc.carryIn} = <b>${sc.s}</b>`;
+  } else if (sub === 6){
+    sc.digit = sc.s % 10;
+    st.result[i] = sc.digit;
+    addEls.status.innerHTML = `写入 c.d[${i}] = s % 10 = <b>${sc.digit}</b>`;
+  } else if (sub === 7){
+    sc.carryOut = Math.floor(sc.s / 10);
+    addEls.status.innerHTML = `carry = s / 10 = <b>${sc.carryOut}</b>` + (sc.carryOut>0 ? '，向左传递一位进位' : '，无需进位');
+    const chipIdx = st.n - (i+1);
+    const chips = addEls.track.children;
+    if (sc.carryOut>0 && chips[chipIdx]){
+      chips[chipIdx].textContent = '+' + sc.carryOut;
+      chips[chipIdx].classList.add('show');
+    }
+  }
+
+  renderVars('add-vars', [
+    ['i', i], ['carry (in)', sc.carryIn], ['x', sc.x], ['y', sc.y],
+    ['s', sc.s], ['c.d[i]', sc.digit], ['carry (out)', sc.carryOut],
+  ]);
+  renderAdd();
+
+  if (sub === 7){ st.carry = sc.carryOut; st.sub = 0; st.i++; }
+  else st.sub++;
+}
+
+function resultToString(result){
+  const arr = result.slice().reverse().map(v=>v===null?0:v);
+  while (arr.length>1 && arr[0]===0) arr.shift();
+  return arr.join('');
+}
+
+function stopAddPlay(){ if(addTimer){clearInterval(addTimer); addTimer=null;} addEls.play.textContent='▶ 播放'; }
+addEls.step.addEventListener('click', ()=>{ stopAddPlay(); stepAdd(); });
+addEls.reset.addEventListener('click', ()=>{ stopAddPlay(); buildAdd(); });
+addEls.play.addEventListener('click', ()=>{
+  if (addTimer){ stopAddPlay(); return; }
+  if (addState.done) buildAdd();
+  addEls.play.textContent='⏸ 暂停';
+  addTimer = setInterval(()=>{ stepAdd(); if(addState.done) stopAddPlay(); }, 950);
+});
+[addEls.a, addEls.b].forEach(inp=>inp.addEventListener('change', ()=>{ stopAddPlay(); buildAdd(); }));
+buildAdd();
+
+/* ---------------- Multiplication demo ---------------- */
+const mulEls = {
+  a: document.getElementById('a2'), b: document.getElementById('b2'),
+  rowA: document.getElementById('mul-rowA'), rowB: document.getElementById('mul-rowB'),
+  buckets: document.getElementById('mul-buckets'), pairline: document.getElementById('mul-pairline'),
+  status: document.getElementById('mul-status'),
+  step: document.getElementById('mul-step'), play: document.getElementById('mul-play'),
+  reset: document.getElementById('mul-reset'),
+};
+let mulState = null, mulTimer = null;
+
+function buildMul(){
+  const sa = (mulEls.a.value.replace(/\D/g,'') || '0');
+  const sb = (mulEls.b.value.replace(/\D/g,'') || '0');
+  const A = digitsOf(sa), B = digitsOf(sb);
+  const bucketCount = A.length + B.length;
+  const buckets = new Array(bucketCount).fill(0);
+  const pairs = [];
+  for (let i=0;i<A.length;i++) for (let j=0;j<B.length;j++) pairs.push([i,j]);
+  mulState = { A, B, buckets, pairs, p:0, sub:0, scratch:{}, phase:'acc', carryK:0, carryDone:false };
+  renderCode('mul-code', MUL_CODE);
+  renderMul();
+  renderVars('mul-vars', [['i',undefined],['j',undefined],['a[i]',undefined],['b[j]',undefined],['product',undefined],['c[i+j]',undefined]]);
+  mulEls.status.innerHTML = `准备就绪：共 ${pairs.length} 对乘积待累加，累加后统一进位。点击「单步」逐行执行 mul()。`;
+  mulEls.pairline.innerHTML = '&nbsp;';
+}
+
+function renderMul(hot){
+  const {A,B,buckets} = mulState;
+  mulEls.rowA.innerHTML=''; mulEls.rowB.innerHTML='';
+  for (let k=A.length-1;k>=0;k--) mulEls.rowA.appendChild(makeCell(A[k], hot && hot.i===k ? 'active':''));
+  for (let k=B.length-1;k>=0;k--) mulEls.rowB.appendChild(makeCell(B[k], hot && hot.j===k ? 'active':''));
+
+  mulEls.buckets.innerHTML='';
+  for (let k=buckets.length-1;k>=0;k--){
+    const col = document.createElement('div');
+    col.className='bucket';
+    const val = document.createElement('div');
+    val.className='val' + (hot && hot.k===k ? ' hot' : (mulState.carryDone ? ' settled':''));
+    val.textContent = buckets[k];
+    const idx = document.createElement('div');
+    idx.className='idx';
+    idx.textContent = 'c['+k+']';
+    col.appendChild(val); col.appendChild(idx);
+    mulEls.buckets.appendChild(col);
+  }
+}
+
+function stepMul(){
+  if (!mulState) return;
+  const st = mulState;
+
+  if (st.phase === 'acc'){
+    if (st.p >= st.pairs.length){
+      st.phase = 'carry'; st.carryK = 0; st.sub = 0;
+      mulEls.pairline.innerHTML = '所有乘积已累加完毕，桶中数值可能 ≥10，接下来统一进位。';
+      renderVars('mul-vars', [['pairs done', st.pairs.length]]);
+      renderMul();
+      return;
+    }
+    const [i,j] = st.pairs[st.p];
+    const sub = st.sub;
+    if (sub === 0) st.scratch = {};
+    const sc = st.scratch;
+
+    if (sub === 0){
+      setCodeHighlight('mul-code', [0], 'acc');
+      mulEls.status.innerHTML = `外层循环：i = <b>${i}</b>`;
+      renderVars('mul-vars', [['i',i],['j',undefined],['a[i]',undefined],['b[j]',undefined],['product',undefined],['c[i+j]',undefined]]);
+      renderMul({i});
+    } else if (sub === 1){
+      setCodeHighlight('mul-code', [1], 'acc');
+      mulEls.status.innerHTML = `内层循环：j = <b>${j}</b>`;
+      renderVars('mul-vars', [['i',i],['j',j],['a[i]',st.A[i]],['b[j]',st.B[j]],['product',undefined],['c[i+j]',undefined]]);
+      renderMul({i,j});
+    } else {
+      sc.prod = st.A[i]*st.B[j];
+      st.buckets[i+j] += sc.prod;
+      setCodeHighlight('mul-code', [2], 'acc');
+      mulEls.pairline.innerHTML = `a[<b>${i}</b>]=${st.A[i]} × b[<b>${j}</b>]=${st.B[j]} = <b>${sc.prod}</b> → 累加进 c[${i+j}]`;
+      mulEls.status.innerHTML = `c[${i+j}] += a[i]·b[j] = ${sc.prod}，当前 c[${i+j}] = <b>${st.buckets[i+j]}</b>`;
+      renderVars('mul-vars', [['i',i],['j',j],['a[i]',st.A[i]],['b[j]',st.B[j]],['product',sc.prod],['c[i+j]',st.buckets[i+j]]]);
+      renderMul({i,j,k:i+j});
+    }
+
+    if (sub === 2){ st.sub = 0; st.p++; } else st.sub++;
+    return;
+  }
+
+  // phase === 'carry'
+  const {buckets} = st;
+  if (st.carryK >= buckets.length-1){
+    st.carryDone = true;
+    mulEls.pairline.innerHTML = '&nbsp;';
+    mulEls.status.innerHTML = `完成！结果为 <b>${bucketsToString(buckets)}</b>`;
+    renderMul();
+    stopMulPlay();
+    return;
+  }
+  const k = st.carryK, sub = st.sub;
+  if (sub === 0) st.scratch = { before: buckets[k] };
+  const sc = st.scratch;
+
+  if (sub === 0){
+    setCodeHighlight('mul-code', [4], 'carry');
+    mulEls.status.innerHTML = `进位循环：k = <b>${k}</b>，当前 c[${k}] = ${sc.before}（未进位，可能 ≥10）`;
+    renderVars('mul-vars', [['k',k],['c[k] (raw)',sc.before],['carry',undefined],['c[k+1]',undefined],['c[k] (final)',undefined]]);
+    renderMul({k});
+  } else if (sub === 1){
+    sc.carry = Math.floor(buckets[k]/10);
+    buckets[k+1] += sc.carry;
+    setCodeHighlight('mul-code', [5], 'carry');
+    mulEls.status.innerHTML = `c[${k+1}] += c[${k}] / 10 = <b>${sc.carry}</b>，c[${k+1}] 现为 <b>${buckets[k+1]}</b>`;
+    renderVars('mul-vars', [['k',k],['c[k] (raw)',sc.before],['carry',sc.carry],['c[k+1]',buckets[k+1]],['c[k] (final)',undefined]]);
+    renderMul({k, k1:k+1});
+  } else {
+    buckets[k] %= 10;
+    setCodeHighlight('mul-code', [6], 'carry');
+    mulEls.status.innerHTML = `c[${k}] %= 10 → 最终数字 <b>${buckets[k]}</b>`;
+    renderVars('mul-vars', [['k',k],['c[k] (raw)',sc.before],['carry',sc.carry],['c[k+1]',buckets[k+1]],['c[k] (final)',buckets[k]]]);
+    renderMul({k});
+  }
+
+  if (sub === 2){ st.sub = 0; st.carryK++; } else st.sub++;
+}
+
+function bucketsToString(buckets){
+  const arr = buckets.slice().reverse();
+  while (arr.length>1 && arr[0]===0) arr.shift();
+  return arr.join('');
+}
+
+function stopMulPlay(){ if(mulTimer){clearInterval(mulTimer); mulTimer=null;} mulEls.play.textContent='▶ 播放'; }
+mulEls.step.addEventListener('click', ()=>{ stopMulPlay(); stepMul(); });
+mulEls.reset.addEventListener('click', ()=>{ stopMulPlay(); buildMul(); });
+mulEls.play.addEventListener('click', ()=>{
+  if (mulTimer){ stopMulPlay(); return; }
+  if (mulState.carryDone) buildMul();
+  mulEls.play.textContent='⏸ 暂停';
+  mulTimer = setInterval(()=>{ stepMul(); if(mulState.carryDone) stopMulPlay(); }, 900);
+});
+[mulEls.a, mulEls.b].forEach(inp=>inp.addEventListener('change', ()=>{ stopMulPlay(); buildMul(); }));
+buildMul();
+
+/* ---------------- Subtraction demo ---------------- */
+const SUB_CODE = [
+  'for (int i = 0; i < a.d.size(); i++) {',
+  '    int x = a.d[i] - borrow;',
+  '',
+  '    int y = 0;',
+  '    if (i < b.d.size()) y = b.d[i];',
+  '',
+  '    int s = x - y;',
+  '    if (s < 0) { s += 10; borrow = 1; } else borrow = 0;',
+  '    c.d[i] = s;',
+  '}',
+  'c.trim();',
+];
+const SUB_STEP_LINES = [0, 1, 3, 4, 6, 7, 8];
+const SUB_FINAL_LINE = [10];
+
+function cmpAbsStr(sa, sb){
+  if (sa.length !== sb.length) return sa.length < sb.length ? -1 : 1;
+  if (sa < sb) return -1;
+  if (sa > sb) return 1;
+  return 0;
+}
+
+const subEls = {
+  a: document.getElementById('a3'), b: document.getElementById('b3'),
+  rowA: document.getElementById('sub-rowA'), rowB: document.getElementById('sub-rowB'),
+  rowC: document.getElementById('sub-rowC'), track: document.getElementById('sub-borrowtrack'),
+  status: document.getElementById('sub-status'),
+  step: document.getElementById('sub-step'), play: document.getElementById('sub-play'),
+  reset: document.getElementById('sub-reset'),
+};
+let subState = null, subTimer = null;
+
+function buildSub(){
+  const sa = (subEls.a.value.replace(/\D/g,'') || '0');
+  const sb = (subEls.b.value.replace(/\D/g,'') || '0');
+  const cmp = cmpAbsStr(sa, sb);
+  const negative = cmp < 0;
+  const big = negative ? sb : sa, small = negative ? sa : sb;
+  const A = digitsOf(big), B = digitsOf(small);
+  const n = A.length;
+  const result = new Array(n).fill(null);
+  subState = { A, B, n, result, i:0, sub:0, borrow:0, scratch:{}, done:false, negative, big, small };
+  renderCode('sub-code', SUB_CODE);
+  renderSub();
+  renderVars('sub-vars', [['i',undefined],['borrow (in)',undefined],['x',undefined],['y',undefined],['s',undefined],['borrow (out)',undefined],['c.d[i]',undefined]]);
+  subEls.status.innerHTML = negative
+    ? `|${sa}| &lt; |${sb}|，改为计算 ${big} − ${small}，结果取负。共 ${n} 位。`
+    : `准备就绪，计算 ${big} − ${small}，共 ${n} 位。点击「单步」逐行执行 sub()。`;
+}
+
+function renderSub(){
+  const {A,B,n,result,i} = subState;
+  subEls.rowA.innerHTML=''; subEls.rowB.innerHTML=''; subEls.rowC.innerHTML=''; subEls.track.innerHTML='';
+  for (let k=n; k>=0; k--){
+    const chip = document.createElement('div');
+    chip.className = 'carrychip';
+    subEls.track.appendChild(chip);
+  }
+  for (let k=n-1; k>=0; k--){
+    const av = A[k];
+    subEls.rowA.appendChild(makeCell(av, k===i && !subState.done ? 'active':''));
+    const bv = k<B.length ? B[k] : null;
+    const cellB = bv===null ? makeCell('','ghost') : makeCell(bv, k===i && !subState.done ? 'active':'');
+    subEls.rowB.appendChild(cellB);
+  }
+  for (let k=n-1; k>=0; k--){
+    const rv = result[k];
+    subEls.rowC.appendChild(makeCell(rv===null?'':rv, rv!==null?'settled':''));
+  }
+}
+
+function stepSub(){
+  if (!subState || subState.done) return;
+  const st = subState;
+
+  if (st.i >= st.n){
+    st.done = true;
+    setCodeHighlight('sub-code', SUB_FINAL_LINE, 'carry');
+    renderVars('sub-vars', [['结果', (st.negative?'-':'') + resultToString(st.result)]]);
+    subEls.status.innerHTML = `c.trim() 去掉多余的前导 0。完成！结果为 <b>${(st.negative?'-':'') + resultToString(st.result)}</b>`;
+    renderSub();
+    stopSubPlay();
+    return;
+  }
+
+  const i = st.i, sub = st.sub;
+  if (sub === 0) st.scratch = { borrowIn: st.borrow };
+  const sc = st.scratch;
+
+  setCodeHighlight('sub-code', [SUB_STEP_LINES[sub]], 'carry');
+
+  if (sub === 0){
+    subEls.status.innerHTML = `进入第 <b>${i+1}</b> 位（i=${i}），携带上一位的 borrow = ${sc.borrowIn}`;
+  } else if (sub === 1){
+    sc.x = st.A[i] - sc.borrowIn;
+    subEls.status.innerHTML = `x = a.d[${i}] − borrow = ${st.A[i]} − ${sc.borrowIn} = <b>${sc.x}</b>`;
+  } else if (sub === 2){
+    sc.y = 0;
+    subEls.status.innerHTML = `y 先设为默认值 <b>0</b>（假设 b 在这一位已经没有数字）`;
+  } else if (sub === 3){
+    const inRange = i < st.B.length;
+    if (inRange) sc.y = st.B[i];
+    subEls.status.innerHTML = inRange
+      ? `i=${i} 在 b.d 范围内，所以 y = b.d[${i}] = <b>${sc.y}</b>`
+      : `i=${i} 超出了 b.d 的范围（b 这一位没有数字了），y 保持默认值 <b>0</b>`;
+  } else if (sub === 4){
+    sc.s = sc.x - sc.y;
+    subEls.status.innerHTML = `s = x − y = ${sc.x} − ${sc.y} = <b>${sc.s}</b>`;
+  } else if (sub === 5){
+    if (sc.s < 0){ sc.s += 10; sc.borrowOut = 1; } else { sc.borrowOut = 0; }
+    subEls.status.innerHTML = sc.borrowOut
+      ? `s &lt; 0，所以 s += 10 → <b>${sc.s}</b>，borrow = <b>1</b>（向下一位借 1）`
+      : `s ≥ 0，无需借位，borrow = <b>0</b>`;
+    const chipIdx = st.n - (i+1);
+    const chips = subEls.track.children;
+    if (sc.borrowOut>0 && chips[chipIdx]){
+      chips[chipIdx].textContent = '−1';
+      chips[chipIdx].classList.add('show');
+    }
+  } else if (sub === 6){
+    st.result[i] = sc.s;
+    subEls.status.innerHTML = `写入 c.d[${i}] = <b>${sc.s}</b>`;
+  }
+
+  renderVars('sub-vars', [
+    ['i', i], ['borrow (in)', sc.borrowIn], ['x', sc.x], ['y', sc.y],
+    ['s', sc.s], ['borrow (out)', sc.borrowOut], ['c.d[i]', st.result[i]],
+  ]);
+  renderSub();
+
+  if (sub === 6){ st.borrow = sc.borrowOut; st.sub = 0; st.i++; }
+  else st.sub++;
+}
+
+function stopSubPlay(){ if(subTimer){clearInterval(subTimer); subTimer=null;} subEls.play.textContent='▶ 播放'; }
+subEls.step.addEventListener('click', ()=>{ stopSubPlay(); stepSub(); });
+subEls.reset.addEventListener('click', ()=>{ stopSubPlay(); buildSub(); });
+subEls.play.addEventListener('click', ()=>{
+  if (subTimer){ stopSubPlay(); return; }
+  if (subState.done) buildSub();
+  subEls.play.textContent='⏸ 暂停';
+  subTimer = setInterval(()=>{ stepSub(); if(subState.done) stopSubPlay(); }, 950);
+});
+[subEls.a, subEls.b].forEach(inp=>inp.addEventListener('change', ()=>{ stopSubPlay(); buildSub(); }));
+buildSub();
+
+/* ---------------- Division demo (÷ 低精度) ---------------- */
+const DIV_CODE = [
+  'for (int i = a.d.size()-1; i >= 0; i--) {',
+  '    int cur = r * 10 + a.d[i];',
+  '    c.d[i] = cur / m;',
+  '    r = cur % m;',
+  '}',
+  'c.trim();',
+];
+const DIV_FINAL_LINE = [5];
+
+const divEls = {
+  a: document.getElementById('a4'), m: document.getElementById('m4'),
+  rowA: document.getElementById('div-rowA'), rowC: document.getElementById('div-rowC'),
+  rem: document.getElementById('div-rem'), status: document.getElementById('div-status'),
+  step: document.getElementById('div-step'), play: document.getElementById('div-play'),
+  reset: document.getElementById('div-reset'),
+};
+let divState = null, divTimer = null;
+
+function buildDiv(){
+  const sa = (divEls.a.value.replace(/\D/g,'') || '0');
+  const m = Math.max(1, parseInt(divEls.m.value.replace(/\D/g,'') || '1', 10));
+  const A = digitsOf(sa);
+  const n = A.length;
+  const result = new Array(n).fill(null);
+  divState = { A, n, m, r:0, result, i:n-1, sub:0, scratch:{}, done:false };
+  renderCode('div-code', DIV_CODE);
+  renderDiv();
+  renderVars('div-vars', [['i',undefined],['r (in)',undefined],['cur',undefined],['c.d[i]',undefined],['r (out)',undefined]]);
+  divEls.status.innerHTML = `准备就绪：计算 ${sa} ÷ ${m}，共 ${n} 位，从最高位开始。点击「单步」逐行执行 divInt()。`;
+}
+
+function renderDiv(){
+  const {A,n,result,i} = divState;
+  divEls.rowA.innerHTML=''; divEls.rowC.innerHTML='';
+  for (let k=n-1;k>=0;k--) divEls.rowA.appendChild(makeCell(A[k], k===i && !divState.done ? 'active':''));
+  for (let k=n-1;k>=0;k--){
+    const rv = result[k];
+    divEls.rowC.appendChild(makeCell(rv===null?'':rv, rv!==null?'settled':''));
+  }
+  divEls.rem.innerHTML = `<span class="lbl">累计余数 r</span><span class="val${divState.done?' settled':''}">${divState.r}</span>`;
+}
+
+function stepDiv(){
+  if (!divState || divState.done) return;
+  const st = divState;
+
+  if (st.i < 0){
+    st.done = true;
+    setCodeHighlight('div-code', DIV_FINAL_LINE, 'carry');
+    renderVars('div-vars', [['商 quotient', resultToString(st.result)], ['余数 r', st.r]]);
+    divEls.status.innerHTML = `c.trim() 去掉多余的前导 0。完成！商 = <b>${resultToString(st.result)}</b>，余数 = <b>${st.r}</b>`;
+    renderDiv();
+    stopDivPlay();
+    return;
+  }
+
+  const i = st.i, sub = st.sub;
+  if (sub === 0) st.scratch = { rIn: st.r };
+  const sc = st.scratch;
+
+  if (sub === 0){
+    setCodeHighlight('div-code', [0], 'carry');
+    divEls.status.innerHTML = `处理第 ${st.n-i} 位（从高到低，i=${i}），携带累积余数 r = ${sc.rIn}`;
+  } else if (sub === 1){
+    sc.cur = sc.rIn * 10 + st.A[i];
+    setCodeHighlight('div-code', [1], 'carry');
+    divEls.status.innerHTML = `cur = r × 10 + a.d[${i}] = ${sc.rIn}×10 + ${st.A[i]} = <b>${sc.cur}</b>`;
+  } else if (sub === 2){
+    sc.digit = Math.floor(sc.cur / st.m);
+    st.result[i] = sc.digit;
+    setCodeHighlight('div-code', [2], 'carry');
+    divEls.status.innerHTML = `c.d[${i}] = cur / m = ${sc.cur} / ${st.m} = <b>${sc.digit}</b>`;
+  } else if (sub === 3){
+    sc.rOut = sc.cur % st.m;
+    setCodeHighlight('div-code', [3], 'carry');
+    divEls.status.innerHTML = `r = cur % m = ${sc.cur} % ${st.m} = <b>${sc.rOut}</b>，带去下一位`;
+  }
+
+  renderVars('div-vars', [
+    ['i', i], ['r (in)', sc.rIn], ['cur', sc.cur], ['c.d[i]', sc.digit], ['r (out)', sc.rOut],
+  ]);
+  renderDiv();
+
+  if (sub === 3){ st.r = sc.rOut; st.sub = 0; st.i--; }
+  else st.sub++;
+}
+
+function stopDivPlay(){ if(divTimer){clearInterval(divTimer); divTimer=null;} divEls.play.textContent='▶ 播放'; }
+divEls.step.addEventListener('click', ()=>{ stopDivPlay(); stepDiv(); });
+divEls.reset.addEventListener('click', ()=>{ stopDivPlay(); buildDiv(); });
+divEls.play.addEventListener('click', ()=>{
+  if (divTimer){ stopDivPlay(); return; }
+  if (divState.done) buildDiv();
+  divEls.play.textContent='⏸ 暂停';
+  divTimer = setInterval(()=>{ stepDiv(); if(divState.done) stopDivPlay(); }, 950);
+});
+[divEls.a, divEls.m].forEach(inp=>inp.addEventListener('change', ()=>{ stopDivPlay(); buildDiv(); }));
+buildDiv();
+</script>
+
+</body></html>

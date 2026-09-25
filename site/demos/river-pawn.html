@@ -1,0 +1,645 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>River Pawn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#e8ece2;
+    --surface:#f5f7f0;
+    --surface-2:#dde3d3;
+    --ink:#23291f;
+    --ink-dim:#5b6350;
+    --line:#b7c0a8;
+    --accent:#b8863c;
+    --accent-ink:#5c4319;
+    --blocked:#b23b2e;
+    --path:#2f6f5e;
+    --path-bg:rgba(47,111,94,0.10);
+    --blocked-bg:rgba(178,59,46,0.12);
+    --gold-bg:rgba(184,134,60,0.16);
+    --shadow:0 1px 2px rgba(30,35,25,0.06), 0 6px 20px -8px rgba(30,35,25,0.18);
+    --error:#b23b2e;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#171d16;
+      --surface:#1f261c;
+      --surface-2:#263123;
+      --ink:#eef2e6;
+      --ink-dim:#a9b39c;
+      --line:#3a4534;
+      --accent:#d9a84f;
+      --accent-ink:#2b2010;
+      --blocked:#e2685a;
+      --path:#5fae98;
+      --path-bg:rgba(95,174,152,0.14);
+      --blocked-bg:rgba(226,104,90,0.16);
+      --gold-bg:rgba(217,168,79,0.16);
+      --shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+      --error:#e2685a;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#171d16;
+    --surface:#1f261c;
+    --surface-2:#263123;
+    --ink:#eef2e6;
+    --ink-dim:#a9b39c;
+    --line:#3a4534;
+    --accent:#d9a84f;
+    --accent-ink:#2b2010;
+    --blocked:#e2685a;
+    --path:#5fae98;
+    --path-bg:rgba(95,174,152,0.14);
+    --blocked-bg:rgba(226,104,90,0.16);
+    --gold-bg:rgba(217,168,79,0.16);
+    --shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+    --error:#e2685a;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    min-height:100vh;
+    padding:clamp(16px,4vw,40px);
+  }
+  .page{
+    max-width:1080px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  header{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  h1{
+    font-family:'Noto Serif SC', 'Songti SC', serif;
+    font-weight:700;
+    font-size:clamp(28px,4vw,38px);
+    margin:0;
+    text-wrap:balance;
+    letter-spacing:0.01em;
+  }
+  h1 .cjk{ color:var(--path); }
+  .subtitle{
+    color:var(--ink-dim);
+    font-size:14.5px;
+    max-width:65ch;
+    line-height:1.5;
+  }
+  .meta-line{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 14px;
+    font-family:'IBM Plex Mono', Consolas, monospace;
+    font-size:12.5px;
+    color:var(--ink-dim);
+  }
+  .meta-line b{ color:var(--ink); font-weight:600; }
+  .rule{
+    height:2px;
+    border-radius:2px;
+    background:linear-gradient(90deg, var(--path), transparent 70%);
+    width:120px;
+    margin-top:2px;
+  }
+
+  main{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(280px,340px);
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width: 760px){
+    main{ grid-template-columns:1fr; }
+  }
+
+  .board-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    box-shadow:var(--shadow);
+  }
+  .board-square{
+    width:100%;
+    max-width:560px;
+    margin:0 auto;
+  }
+  .board-wrap{
+    display:inline-grid;
+    grid-template-columns:22px auto;
+    grid-template-rows:16px auto;
+    gap:4px;
+    max-width:100%;
+  }
+  .corner{}
+  .col-labels, .row-labels{
+    display:grid;
+    font-family:'IBM Plex Mono', Consolas, monospace;
+    font-size:10px;
+    color:var(--ink-dim);
+    overflow:hidden;
+  }
+  .col-labels{
+    align-items:center;
+    justify-items:center;
+  }
+  .row-labels{
+    align-items:center;
+    justify-items:center;
+  }
+  .grid{
+    display:grid;
+    gap:2px;
+    background:var(--line);
+    border-radius:8px;
+    padding:3px;
+  }
+  .cell{
+    background:var(--surface-2);
+    border-radius:4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', Consolas, monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:clamp(6px, calc(var(--cellpx, 32px) * 0.42), 17px);
+    font-weight:600;
+    color:var(--ink-dim);
+    position:relative;
+    overflow:hidden;
+    transition:background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .cell.filled{ color:var(--ink); }
+  .cell.controlled{ background:var(--blocked-bg); color:var(--blocked); }
+  .cell.controlled.filled{ color:var(--blocked); }
+  .cell.filled:not(.controlled){ background:var(--path-bg); color:var(--path); }
+  .cell.start{ background:var(--gold-bg); color:var(--accent-ink); font-weight:700; }
+  .cell.start.filled{ color:var(--accent-ink); }
+  .cell.target{ box-shadow:inset 0 0 0 2px var(--accent); }
+  .cell.current{
+    box-shadow:0 0 0 2px var(--accent), 0 0 0 5px var(--gold-bg);
+    z-index:1;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .cell.current{ animation:pulse 1.1s ease-in-out infinite; }
+  }
+  @keyframes pulse{
+    0%,100%{ box-shadow:0 0 0 2px var(--accent), 0 0 0 5px var(--gold-bg); }
+    50%{ box-shadow:0 0 0 2px var(--accent), 0 0 0 8px var(--gold-bg); }
+  }
+  .cell .glyph{ font-family:'Noto Serif SC', serif; font-size:0.85em; }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 18px;
+    margin-top:16px;
+    font-size:12.5px;
+    color:var(--ink-dim);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; flex:none; }
+  .sw-start{ background:var(--gold-bg); box-shadow:inset 0 0 0 1px var(--accent); }
+  .sw-target{ background:var(--surface-2); box-shadow:inset 0 0 0 2px var(--accent); }
+  .sw-blocked{ background:var(--blocked-bg); box-shadow:inset 0 0 0 1px var(--blocked); }
+  .sw-path{ background:var(--path-bg); box-shadow:inset 0 0 0 1px var(--path); }
+
+  .panel{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+  }
+  .caption-card{ min-height:132px; display:flex; flex-direction:column; gap:8px; }
+  .caption-title{
+    font-family:'Noto Serif SC', serif;
+    font-weight:700;
+    font-size:16px;
+    color:var(--path);
+  }
+  .caption-text{
+    font-size:14px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+
+  .controls{ display:flex; flex-direction:column; gap:10px; }
+  .transport{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  button{
+    font-family:inherit;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    cursor:pointer;
+    transition:background 0.15s ease, transform 0.1s ease;
+  }
+  button:hover{ background:var(--gold-bg); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible, input[type="range"]:focus-visible, input[type="number"]:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+  button.play{ flex:1; background:var(--path); color:var(--surface); border-color:var(--path); }
+  button.play:hover{ filter:brightness(1.08); background:var(--path); }
+  button:disabled{ opacity:0.4; cursor:default; }
+  button.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  button.primary:hover{ filter:brightness(1.06); background:var(--accent); }
+
+  input[type="range"]{
+    width:100%;
+    accent-color:var(--path);
+  }
+  .step-count{
+    font-family:'IBM Plex Mono', Consolas, monospace;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    display:flex;
+    justify-content:space-between;
+  }
+  .step-count b{ color:var(--ink); font-weight:600; }
+
+  .hint{
+    font-size:12px;
+    color:var(--ink-dim);
+    line-height:1.5;
+  }
+  kbd{
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 5px;
+    font-size:11px;
+  }
+
+  .setup-card{ display:flex; flex-direction:column; gap:10px; }
+  .setup-title{
+    font-family:'Noto Serif SC', serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .field-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 10px;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .field label{
+    font-size:11.5px;
+    color:var(--ink-dim);
+    font-family:'IBM Plex Mono', Consolas, monospace;
+  }
+  .field input[type="number"]{
+    font-family:'IBM Plex Mono', Consolas, monospace;
+    font-size:14px;
+    padding:6px 8px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:var(--surface-2);
+    color:var(--ink);
+    width:100%;
+  }
+  .setup-note{
+    font-size:11.5px;
+    color:var(--ink-dim);
+    line-height:1.5;
+  }
+  .setup-error{
+    font-size:12px;
+    color:var(--error);
+    min-height:16px;
+  }
+</style>
+
+<div class="page">
+  <header>
+    <h1>River Pawn <span class="cjk">过河卒</span></h1>
+    <p class="subtitle">A pawn walks from (0,0) toward (n,m), moving only right or down, while a horse's eight knight-moves mark squares it must avoid. Set your own board below and watch the DP table fill in, exactly the way the C++ solution computes it.</p>
+    <div class="rule"></div>
+    <div class="meta-line">
+      <span>target <b id="metaTarget">(6, 6)</b></span>
+      <span>horse at <b id="metaHorse">(3, 3)</b></span>
+      <span>result: <b id="metaResult">6</b></span>
+    </div>
+  </header>
+
+  <main>
+    <div class="board-card">
+      <div class="board-square" id="boardSquare">
+        <div class="board-wrap">
+          <div class="corner"></div>
+          <div class="col-labels" id="colLabels"></div>
+          <div class="row-labels" id="rowLabels"></div>
+          <div class="grid" id="grid"></div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="swatch sw-start"></i>start, 1 path</span>
+        <span><i class="swatch sw-target"></i>target (n, m)</span>
+        <span><i class="swatch sw-blocked"></i>horse's control</span>
+        <span><i class="swatch sw-path"></i>paths counted</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="card setup-card">
+        <div class="setup-title">Board setup</div>
+        <div class="field-grid">
+          <div class="field"><label for="inN">n (rows)</label><input type="number" id="inN" min="1" max="20" value="6"></div>
+          <div class="field"><label for="inM">m (cols)</label><input type="number" id="inM" min="1" max="20" value="6"></div>
+          <div class="field"><label for="inHX">horse x</label><input type="number" id="inHX" min="0" max="20" value="3"></div>
+          <div class="field"><label for="inHY">horse y</label><input type="number" id="inHY" min="0" max="20" value="3"></div>
+        </div>
+        <button class="primary" id="regen">Generate trace</button>
+        <div class="setup-error" id="setupError"></div>
+        <div class="setup-note">n and m are capped at 20 each so the grid stays legible on screen. Horse position must lie within (0,0)–(n,m) and off the start/target squares.</div>
+      </div>
+
+      <div class="card caption-card">
+        <div class="caption-title" id="capTitle">Ready</div>
+        <div class="caption-text" id="capText"></div>
+      </div>
+
+      <div class="card controls">
+        <div class="transport">
+          <button id="toStart" title="Jump to start">⏮</button>
+          <button id="prev" title="Previous step">◀</button>
+          <button id="play" class="play" title="Play / pause">▶ Play</button>
+          <button id="next" title="Next step">▶</button>
+          <button id="toEnd" title="Jump to end">⏭</button>
+        </div>
+        <input type="range" id="scrub" min="0" max="59" value="0" step="1">
+        <div class="step-count"><span>step</span><b id="stepLabel">0 / 59</b></div>
+        <div class="hint">Space to play/pause, <kbd>←</kbd>/<kbd>→</kbd> to step.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const MAX_DIM = 20;
+
+function generateFrames(n, m, hx, hy) {
+  const frames = [];
+  const dx = [-2,-2,-1,-1,1,1,2,2], dy = [-1,1,-2,2,-2,2,-1,1];
+  const blocked = new Set();
+  function mark(x, y) {
+    if (x < 0 || x > n || y < 0 || y > m) return;
+    const k = x + ',' + y;
+    if (!blocked.has(k)) { blocked.add(k); frames.push({ type: 'block', x, y }); }
+  }
+  mark(hx, hy);
+  for (let i = 0; i < 8; i++) mark(hx + dx[i], hy + dy[i]);
+  frames.push({ type: 'setup_done', n, m, hx, hy });
+
+  const d = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  d[0][0] = blocked.has('0,0') ? 0 : 1;
+  for (let x = 0; x <= n; x++) {
+    for (let y = 0; y <= m; y++) {
+      if (x === 0 && y === 0) continue;
+      let val, from;
+      if (blocked.has(x + ',' + y)) { val = 0; from = 'blocked'; }
+      else if (x === 0) { val = d[x][y - 1]; from = 'left'; }
+      else if (y === 0) { val = d[x - 1][y]; from = 'up'; }
+      else { val = d[x - 1][y] + d[x][y - 1]; from = 'both'; }
+      d[x][y] = val;
+      frames.push({ type: 'cell', x, y, val, from });
+    }
+  }
+  frames.push({ type: 'answer', val: d[n][m] });
+  return frames;
+}
+
+let frames, N, M, HX, HY, TOTAL;
+const grid = document.getElementById('grid');
+const colLabels = document.getElementById('colLabels');
+const rowLabels = document.getElementById('rowLabels');
+const boardSquare = document.getElementById('boardSquare');
+let cellEls = {};
+
+const MIN_CELL = 14, MAX_CELL = 56;
+
+const LABEL_W = 22, LABEL_H = 16, WRAP_GAP = 4;
+
+function layoutBoard() {
+  if (!N && N !== 0) return;
+  const cols = M + 1, rows = N + 1;
+  const availWidth = (boardSquare.clientWidth || 320) - LABEL_W - WRAP_GAP;
+  const availHeight = Math.min(window.innerHeight * 0.55, 560) - LABEL_H - WRAP_GAP;
+  let cellPx = Math.floor(Math.min(availWidth / cols, availHeight / rows));
+  cellPx = Math.max(MIN_CELL, Math.min(MAX_CELL, cellPx));
+
+  grid.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
+  grid.style.gridTemplateRows = `repeat(${rows}, ${cellPx}px)`;
+  colLabels.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
+  rowLabels.style.gridTemplateRows = `repeat(${rows}, ${cellPx}px)`;
+  document.documentElement.style.setProperty('--cellpx', cellPx + 'px');
+}
+
+function buildBoard(n, m, hx, hy) {
+  N = n; M = m; HX = hx; HY = hy;
+  colLabels.innerHTML = '';
+  rowLabels.innerHTML = '';
+  grid.innerHTML = '';
+  cellEls = {};
+  for (let y = 0; y <= M; y++) { const el = document.createElement('div'); el.textContent = y; colLabels.appendChild(el); }
+  for (let x = 0; x <= N; x++) { const el = document.createElement('div'); el.textContent = x; rowLabels.appendChild(el); }
+  for (let x = 0; x <= N; x++) {
+    for (let y = 0; y <= M; y++) {
+      const el = document.createElement('div');
+      el.className = 'cell';
+      if (x === 0 && y === 0) el.classList.add('start');
+      if (x === N && y === M) el.classList.add('target');
+      el.style.gridColumn = y + 1;
+      el.style.gridRow = x + 1;
+      grid.appendChild(el);
+      cellEls[x + ',' + y] = el;
+    }
+  }
+  layoutBoard();
+  document.getElementById('metaTarget').textContent = `(${N}, ${M})`;
+  document.getElementById('metaHorse').textContent = `(${HX}, ${HY})`;
+}
+
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(layoutBoard, 100);
+});
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(() => layoutBoard()).observe(boardSquare);
+}
+
+function buildBoardStateUpTo(idx) {
+  const board = {};
+  for (let x = 0; x <= N; x++) for (let y = 0; y <= M; y++) board[x + ',' + y] = { x, y, controlled: false, filled: false, val: null };
+  for (let i = 0; i < idx; i++) {
+    const f = frames[i];
+    if (f.type === 'block') board[f.x + ',' + f.y].controlled = true;
+    else if (f.type === 'cell') { const c = board[f.x + ',' + f.y]; c.filled = true; c.val = f.val; }
+  }
+  if (!board['0,0'].controlled) { board['0,0'].filled = true; if (board['0,0'].val === null) board['0,0'].val = 1; }
+  return board;
+}
+
+function describe(idx) {
+  if (idx === 0) return { title: 'Ready', text: `The pawn starts at (0,0). Step forward to mark the horse's control points.` };
+  const f = frames[idx - 1];
+  if (f.type === 'block') {
+    const isHorse = f.x === HX && f.y === HY;
+    return {
+      title: `Control point (${f.x}, ${f.y})`,
+      text: isHorse ? `This is the horse's own square — it counts as controlled too, along with its knight-moves.`
+                    : `A knight's move from (${HX}, ${HY}). The pawn may never land here.`
+    };
+  }
+  if (f.type === 'setup_done') {
+    const n = frames.filter(fr => fr.type === 'block').length;
+    return { title: 'Control points marked', text: `${n} squares are now off-limits. Filling d[x][y] = paths from (0,0) to (x,y), row by row.` };
+  }
+  if (f.type === 'cell') {
+    if (f.from === 'blocked') return { title: `(${f.x}, ${f.y}) — blocked`, text: `Under the horse's control, so d[${f.x}][${f.y}] = 0. No path may pass through it.` };
+    if (f.from === 'left') return { title: `(${f.x}, ${f.y}), top row`, text: `Only arrivals from the left: d[${f.x}][${f.y}] = d[${f.x}][${f.y - 1}] = ${f.val}.` };
+    if (f.from === 'up') return { title: `(${f.x}, ${f.y}), left column`, text: `Only arrivals from above: d[${f.x}][${f.y}] = d[${f.x - 1}][${f.y}] = ${f.val}.` };
+    if (f.from === 'both') {
+      const prev = buildBoardStateUpTo(idx - 1);
+      const l = prev[f.x + ',' + (f.y - 1)].val ?? 0, u = prev[(f.x - 1) + ',' + f.y].val ?? 0;
+      return { title: `(${f.x}, ${f.y})`, text: `d[${f.x}][${f.y}] = d[${f.x}][${f.y - 1}] + d[${f.x - 1}][${f.y}] = ${l} + ${u} = ${f.val}.` };
+    }
+  }
+  if (f.type === 'answer') return { title: 'Done', text: `d[${N}][${M}] = ${f.val} — the number of distinct paths from (0,0) to (${N},${M}) that never cross a control point.` };
+}
+
+let idx = 0, playing = false, timer = null;
+
+function render() {
+  const board = buildBoardStateUpTo(idx);
+  const cur = idx > 0 ? frames[idx - 1] : null;
+  const curX = cur ? (cur.type === 'answer' ? N : cur.x) : null;
+  const curY = cur ? (cur.type === 'answer' ? M : cur.y) : null;
+
+  for (const key in cellEls) {
+    const c = board[key], el = cellEls[key];
+    el.classList.toggle('controlled', c.controlled);
+    el.classList.toggle('filled', c.filled);
+    el.classList.toggle('current', cur && cur.type !== 'setup_done' && c.x === curX && c.y === curY);
+    if (c.x === HX && c.y === HY && c.controlled) {
+      el.innerHTML = c.filled ? c.val : '<span class="glyph">马</span>';
+    } else if (c.filled) {
+      el.textContent = c.val;
+    } else if (c.controlled) {
+      el.textContent = '×';
+    } else {
+      el.textContent = '';
+    }
+  }
+
+  const { title, text } = describe(idx);
+  document.getElementById('capTitle').textContent = title;
+  document.getElementById('capText').textContent = text;
+  document.getElementById('stepLabel').textContent = `${idx} / ${TOTAL}`;
+  document.getElementById('scrub').value = idx;
+  document.getElementById('prev').disabled = idx === 0;
+  document.getElementById('toStart').disabled = idx === 0;
+  document.getElementById('next').disabled = idx === TOTAL;
+  document.getElementById('toEnd').disabled = idx === TOTAL;
+
+  const ansFrame = frames.find(fr => fr.type === 'answer');
+  document.getElementById('metaResult').textContent = idx >= TOTAL ? ansFrame.val : '?';
+}
+
+function setIdx(v) { idx = Math.max(0, Math.min(TOTAL, v)); render(); }
+
+function stop() { playing = false; clearInterval(timer); document.getElementById('play').textContent = '▶ Play'; }
+function play() {
+  if (idx >= TOTAL) idx = 0;
+  playing = true;
+  document.getElementById('play').textContent = '⏸ Pause';
+  timer = setInterval(() => {
+    if (idx >= TOTAL) { stop(); return; }
+    setIdx(idx + 1);
+  }, 550);
+}
+
+document.getElementById('prev').addEventListener('click', () => { stop(); setIdx(idx - 1); });
+document.getElementById('next').addEventListener('click', () => { stop(); setIdx(idx + 1); });
+document.getElementById('toStart').addEventListener('click', () => { stop(); setIdx(0); });
+document.getElementById('toEnd').addEventListener('click', () => { stop(); setIdx(TOTAL); });
+document.getElementById('play').addEventListener('click', () => { playing ? stop() : play(); });
+document.getElementById('scrub').addEventListener('input', (e) => { stop(); setIdx(parseInt(e.target.value, 10)); });
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); playing ? stop() : play(); }
+  else if (e.code === 'ArrowRight') { stop(); setIdx(idx + 1); }
+  else if (e.code === 'ArrowLeft') { stop(); setIdx(idx - 1); }
+});
+
+function regenerate() {
+  const errEl = document.getElementById('setupError');
+  errEl.textContent = '';
+  let n = parseInt(document.getElementById('inN').value, 10);
+  let m = parseInt(document.getElementById('inM').value, 10);
+  let hx = parseInt(document.getElementById('inHX').value, 10);
+  let hy = parseInt(document.getElementById('inHY').value, 10);
+
+  if (![n, m, hx, hy].every(Number.isFinite)) { errEl.textContent = 'Please fill in all four fields with numbers.'; return; }
+  if (n < 1 || n > MAX_DIM || m < 1 || m > MAX_DIM) { errEl.textContent = `n and m must be between 1 and ${MAX_DIM}.`; return; }
+  if (hx < 0 || hx > n || hy < 0 || hy > m) { errEl.textContent = `Horse position must lie within (0,0)–(${n},${m}).`; return; }
+  if ((hx === 0 && hy === 0) || (hx === n && hy === m)) { errEl.textContent = 'Horse cannot sit on the start or target square.'; return; }
+
+  document.getElementById('inN').value = n;
+  document.getElementById('inM').value = m;
+  document.getElementById('inHX').value = hx;
+  document.getElementById('inHY').value = hy;
+
+  stop();
+  buildBoard(n, m, hx, hy);
+  frames = generateFrames(n, m, hx, hy);
+  TOTAL = frames.length;
+  document.getElementById('scrub').max = TOTAL;
+  idx = 0;
+  render();
+}
+
+document.getElementById('regen').addEventListener('click', regenerate);
+[document.getElementById('inN'), document.getElementById('inM'), document.getElementById('inHX'), document.getElementById('inHY')].forEach(el => {
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter') regenerate(); });
+});
+
+buildBoard(6, 6, 3, 3);
+frames = generateFrames(6, 6, 3, 3);
+TOTAL = frames.length;
+document.getElementById('scrub').max = TOTAL;
+render();
+</script>
+
+</body></html>

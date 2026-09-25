@@ -1,0 +1,262 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>LCD Digits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Noto+Serif+SC:wght@700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#efece2;
+    --surface:#f8f6ee;
+    --surface-2:#e6e1d0;
+    --ink:#262420;
+    --ink-dim:#746f5f;
+    --line:#d8d2bf;
+    --accent:#3f7a72;
+    --accent-ink:#1c332f;
+    --accent-bg:rgba(63,122,114,0.12);
+    --shadow:0 1px 2px rgba(30,28,20,0.06), 0 6px 20px -8px rgba(30,28,20,0.20);
+
+    --lcd-glass:#9fb49a;
+    --lcd-glass-2:#8fa589;
+    --lcd-off:#8fa48a;
+    --lcd-on:#22331f;
+    --lcd-frame:#4b463a;
+    --lcd-frame-2:#3a362c;
+    --lcd-label:#e9e4d2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15140f;
+      --surface:#1c1b14;
+      --surface-2:#242319;
+      --ink:#eeece2;
+      --ink-dim:#a29c87;
+      --line:#3a382a;
+      --accent:#5fb0a5;
+      --accent-ink:#e7f7f4;
+      --accent-bg:rgba(95,176,165,0.16);
+      --shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15140f;
+    --surface:#1c1b14;
+    --surface-2:#242319;
+    --ink:#eeece2;
+    --ink-dim:#a29c87;
+    --line:#3a382a;
+    --accent:#5fb0a5;
+    --accent-ink:#e7f7f4;
+    --accent-bg:rgba(95,176,165,0.16);
+    --shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+    min-height:100vh;
+    padding:clamp(16px,4vw,40px);
+  }
+  .page{ max-width:940px; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
+
+  header{ display:flex; flex-direction:column; gap:6px; }
+  h1{
+    font-family:'Sora',sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,4vw,38px);
+    margin:0;
+    text-wrap:balance;
+    letter-spacing:-0.01em;
+  }
+  h1 .cjk{ font-family:'Noto Serif SC',serif; color:var(--accent); font-size:0.72em; margin-left:4px; }
+  .subtitle{ color:var(--ink-dim); font-size:14.5px; max-width:70ch; line-height:1.55; }
+  .rule{ height:2px; border-radius:2px; background:linear-gradient(90deg, var(--accent), transparent 70%); width:120px; margin-top:2px; }
+  .meta-line{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.5px; color:var(--ink-dim); }
+  .meta-line b{ color:var(--ink); font-weight:600; }
+
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px 22px; box-shadow:var(--shadow); }
+  .card h2{
+    font-family:'Sora',sans-serif; font-size:14px; font-weight:600;
+    margin:0 0 14px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.06em;
+  }
+
+  /* legend of the ten glyphs */
+  .legend-row{ display:flex; flex-wrap:wrap; gap:14px; }
+  .legend-tile{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .legend-tile .digit-label{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-dim); }
+
+  .lcd-frame{
+    background:linear-gradient(180deg, var(--lcd-frame), var(--lcd-frame-2));
+    border-radius:10px;
+    padding:10px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .lcd-glass{
+    background:linear-gradient(180deg, var(--lcd-glass), var(--lcd-glass-2));
+    border-radius:5px;
+    padding:8px;
+    overflow-x:auto;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,0.22);
+  }
+  .lcd-rows{ display:flex; flex-direction:column; gap:2px; width:max-content; }
+  .lcd-row{ display:flex; gap:2px; }
+  .dot{ border-radius:2px; flex:none; }
+
+  .legend-tile .lcd-frame{ padding:6px; }
+  .legend-tile .dot{ width:6px; height:6px; }
+  .legend-tile .dot.on{ background:var(--lcd-on); }
+  .legend-tile .dot.off{ background:var(--lcd-off); opacity:0.55; }
+  .legend-tile .dot.gap{ background:transparent; }
+
+  .sandbox-input{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  }
+  .sandbox-input label{ font-size:13px; color:var(--ink-dim); flex:none; }
+  .sandbox-input input{
+    flex:1; min-width:0;
+    font-family:'IBM Plex Mono',monospace; font-size:15px; letter-spacing:0.05em;
+    background:var(--surface-2); color:var(--ink);
+    border:1px solid var(--line); border-radius:8px; padding:9px 12px;
+  }
+  .sandbox-input input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .sandbox-hint{ font-size:12px; color:var(--ink-dim); margin-top:8px; }
+
+  .big .dot{ width:clamp(9px,1.6vw,15px); height:clamp(9px,1.6vw,15px); }
+  .big .dot.on{ background:var(--lcd-on); box-shadow:inset 0 0 0 1px rgba(0,0,0,0.15); }
+  .big .dot.off{ background:var(--lcd-off); opacity:0.5; }
+  .big .dot.gap{ background:transparent; }
+
+  .raw-title{ display:flex; justify-content:space-between; align-items:baseline; margin:18px 0 8px; }
+  .raw-title span{ font-size:12px; color:var(--ink-dim); }
+  pre.raw{
+    font-family:'IBM Plex Mono',Consolas,monospace;
+    font-size:12.5px; line-height:1.7;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    overflow-x:auto;
+    color:var(--ink);
+    margin:0;
+  }
+
+  footer{ font-size:13px; color:var(--ink-dim); line-height:1.6; }
+  footer b{ color:var(--ink); }
+</style>
+
+<div class="page">
+  <header>
+    <h1>LCD Digits<span class="cjk">显示屏</span></h1>
+    <p class="subtitle">Every digit lights up on a 3-wide, 5-tall dot screen — <code>X</code> lit, <code>.</code> dark — with exactly one dark column between neighboring digits. Given a string of up to 100 digits, the program prints the five rows of the whole display. Play with the display here, then see the solution and a line-by-line trace in Row by Row.</p>
+    <div class="rule"></div>
+    <div class="meta-line">
+      <span>1 ≤ n ≤ <b>100</b></span>
+      <span>each digit: <b>3×5</b> + 1 blank column</span>
+      <span>output: <b>5</b> lines</span>
+      <span>sample: <b>0123456789</b></span>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>The ten glyphs</h2>
+    <div class="legend-row" id="legend"></div>
+  </div>
+
+  <div class="card">
+    <h2>Try it</h2>
+    <div class="sandbox-input">
+      <label for="digitInput">digits</label>
+      <input id="digitInput" type="text" inputmode="numeric" value="0123456789" maxlength="40" spellcheck="false">
+    </div>
+    <div class="lcd-frame">
+      <div class="lcd-glass"><div class="lcd-rows big" id="lcdBig"></div></div>
+    </div>
+    <div class="sandbox-hint">Type any digits (letters are ignored, capped at 40 for the sandbox). This is exactly what your program has to reproduce as plain text — shown below.</div>
+
+    <div class="raw-title"><h2 style="margin:0;">What stdout must look like</h2><span id="rawMeta"></span></div>
+    <pre class="raw" id="rawOut"></pre>
+  </div>
+
+</div>
+
+<script>
+const PATTERNS = {
+  '0': ['XXX','X.X','X.X','X.X','XXX'],
+  '1': ['..X','..X','..X','..X','..X'],
+  '2': ['XXX','..X','XXX','X..','XXX'],
+  '3': ['XXX','..X','XXX','..X','XXX'],
+  '4': ['X.X','X.X','XXX','..X','..X'],
+  '5': ['XXX','X..','XXX','..X','XXX'],
+  '6': ['XXX','X..','XXX','X.X','XXX'],
+  '7': ['XXX','..X','..X','..X','..X'],
+  '8': ['XXX','X.X','XXX','X.X','XXX'],
+  '9': ['XXX','X.X','XXX','..X','XXX'],
+};
+
+function buildLCD(container, digits, big) {
+  container.innerHTML = '';
+  for (let r = 0; r < 5; r++) {
+    const row = document.createElement('div');
+    row.className = 'lcd-row';
+    digits.forEach((d, di) => {
+      const pat = PATTERNS[d][r];
+      for (const ch of pat) {
+        const dot = document.createElement('div');
+        dot.className = 'dot ' + (ch === 'X' ? 'on' : 'off');
+        row.appendChild(dot);
+      }
+      if (di < digits.length - 1) {
+        const gap = document.createElement('div');
+        gap.className = 'dot off';
+        row.appendChild(gap);
+      }
+    });
+    container.appendChild(row);
+  }
+}
+
+function rawText(digits) {
+  const lines = [];
+  for (let r = 0; r < 5; r++) {
+    lines.push(digits.map(d => PATTERNS[d][r]).join('.'));
+  }
+  return lines.join('\n');
+}
+
+// legend of all ten digits
+const legend = document.getElementById('legend');
+for (const d of '0123456789') {
+  const tile = document.createElement('div');
+  tile.className = 'legend-tile';
+  tile.innerHTML = `<div class="lcd-frame"><div class="lcd-rows" id="leg-${d}"></div></div><span class="digit-label">${d}</span>`;
+  legend.appendChild(tile);
+}
+for (const d of '0123456789') {
+  buildLCD(document.getElementById('leg-' + d), [d], false);
+}
+
+const input = document.getElementById('digitInput');
+const lcdBig = document.getElementById('lcdBig');
+const rawOut = document.getElementById('rawOut');
+const rawMeta = document.getElementById('rawMeta');
+
+function update() {
+  const digits = input.value.replace(/[^0-9]/g, '').slice(0, 40).split('');
+  const shown = digits.length ? digits : ['0'];
+  buildLCD(lcdBig, shown, true);
+  rawOut.textContent = rawText(shown);
+  rawMeta.textContent = `n = ${shown.length}`;
+}
+
+input.addEventListener('input', () => {
+  const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 40);
+  if (filtered !== input.value) input.value = filtered;
+  update();
+});
+
+update();
+</script>
+
+</body></html>

@@ -194,19 +194,26 @@ main:focus { outline: none; }
 .card-actions .btn { padding: 8px 12px; min-height: 40px; font-size: 0.92rem; }
 .note { color: var(--muted); font-size: 0.85rem; margin-top: 20px; }
 
-.demos-box {
-  background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
-  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+.project-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.project-head h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.2rem); text-wrap: balance; }
+.project-head .pid { font-size: 0.95rem; }
+
+.demo-section {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 12px; margin-bottom: 28px;
 }
-.demos-box h2 { margin: 0 0 10px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
-.demo-list { display: grid; gap: 8px; }
-.demo {
-  display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--border); color: var(--text); text-decoration: none;
+.demo-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 2px 4px; }
+.demo-title { margin: 0; font-size: 1rem; flex: 1; }
+.demo-tabs { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.demo-tab {
+  padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2);
+  cursor: pointer; font-weight: 600; font-size: 0.92rem; min-height: 38px;
 }
-.demo:hover { border-color: var(--accent); }
-.demo-name { font-weight: 700; color: var(--accent); }
-.demo-desc { font-size: 0.9rem; color: var(--muted); }
+.demo-tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.demo-open { font-size: 0.9rem; font-weight: 600; white-space: nowrap; }
+.demo-desc { margin: 6px 4px 10px; color: var(--muted); font-size: 0.92rem; }
+.demo-frame { display: block; width: 100%; height: 720px; border: 0; border-radius: 10px; background: var(--surface-2); }
+.section-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin: 0 0 10px; }
 
 /* ---------- Notes (prose) ---------- */
 .prose {

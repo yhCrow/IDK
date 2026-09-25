@@ -1,0 +1,1050 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Stack Permutation Trace</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:      #eef1ee;
+    --paper-raise:#ffffff;
+    --ink:        #182420;
+    --ink-soft:   #55655d;
+    --ink-faint:  #8b988f;
+    --line:       #d4dbd5;
+    --accent:     #c8781e;
+    --accent-soft:#f3ddb9;
+    --accent-2:   #2f8f83;
+    --accent-2-soft:#cfe9e4;
+    --shadow: 0 1px 2px rgba(24,36,32,.06), 0 10px 24px -14px rgba(24,36,32,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:      #121815;
+      --paper-raise:#1a2320;
+      --ink:        #edf2ee;
+      --ink-soft:   #a6b3ac;
+      --ink-faint:  #6d7a73;
+      --line:       #2c3833;
+      --accent:     #eb9a3f;
+      --accent-soft:#4a3a1f;
+      --accent-2:   #4fb6a8;
+      --accent-2-soft:#1c3733;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 30px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #121815;
+    --paper-raise:#1a2320;
+    --ink:        #edf2ee;
+    --ink-soft:   #a6b3ac;
+    --ink-faint:  #6d7a73;
+    --line:       #2c3833;
+    --accent:     #eb9a3f;
+    --accent-soft:#4a3a1f;
+    --accent-2:   #4fb6a8;
+    --accent-2-soft:#1c3733;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 30px -16px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:780px;
+    margin:0 auto;
+    padding:52px 24px 80px;
+    display:flex;
+    flex-direction:column;
+    gap:36px;
+  }
+
+  /* ---------- masthead ---------- */
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--accent-2);
+    font-weight:500;
+  }
+  h1{
+    font-family:"Fraunces", Georgia, serif;
+    font-optical-sizing:auto;
+    font-weight:560;
+    font-size:clamp(30px,5vw,42px);
+    line-height:1.08;
+    margin:8px 0 12px;
+    text-wrap:balance;
+    letter-spacing:-.01em;
+  }
+  .recap{
+    color:var(--ink-soft);
+    font-size:16px;
+    line-height:1.55;
+    max-width:62ch;
+  }
+  .recap b{color:var(--ink); font-weight:600;}
+  .budget{
+    margin-top:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:6px 12px;
+  }
+  .budget strong{color:var(--accent); font-weight:600;}
+
+  /* ---------- trace panel ---------- */
+  .panel{
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:28px 26px 22px;
+  }
+  .panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:18px;
+  }
+  .panel-head h2{
+    font-family:"Fraunces", Georgia, serif;
+    font-weight:560;
+    font-size:18px;
+    margin:0;
+  }
+  .panel-head span{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11.5px;
+    color:var(--ink-faint);
+  }
+  .n-control{ display:flex; align-items:center; gap:7px; }
+  .n-btn{
+    width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); border-radius:6px; background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Mono", monospace; font-size:15px; line-height:1; cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .n-btn:hover{ border-color:var(--accent-2); }
+  .n-control label{ font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--ink-soft); }
+  #nInput{
+    width:44px; text-align:center; font-family:"IBM Plex Mono", monospace; font-size:13px;
+    border:1px solid var(--line); border-radius:6px; padding:4px 2px; background:var(--paper); color:var(--ink);
+  }
+  #nInput:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
+  .n-hint{ font-family:"IBM Plex Mono", monospace; font-size:10.5px; color:var(--ink-faint); }
+  .formula{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:clamp(14px,2.4vw,17px);
+    text-align:center;
+    color:var(--ink);
+    min-height:26px;
+    letter-spacing:.01em;
+  }
+  .formula .op{color:var(--ink-faint); margin:0 .3em;}
+  .formula .j-val{color:var(--accent-2); font-weight:600;}
+  .formula .term-val{color:var(--accent); font-weight:600;}
+  .formula .arrow-eq{color:var(--ink-faint); margin:0 .45em;}
+
+  .row-wrap{ margin-top:22px; }
+  .box-row{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:1fr;
+    gap:10px;
+  }
+  .cell{
+    position:relative;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    padding:8px 4px 10px;
+    text-align:center;
+    transition:border-color .25s ease, background .25s ease, transform .25s ease;
+  }
+  .cell .idx{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11px;
+    color:var(--ink-faint);
+  }
+  .cell .val{
+    font-family:"IBM Plex Mono", monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:clamp(16px,3vw,21px);
+    font-weight:600;
+    color:var(--ink-faint);
+    margin-top:2px;
+  }
+  .cell.has-val .val{ color:var(--ink); }
+  .cell.src{
+    border-color:var(--accent-2);
+    background:var(--accent-2-soft);
+  }
+  .cell.src .val{ color:var(--accent-2); }
+  .cell.target{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+    transform:translateY(-2px);
+  }
+  .cell.target .val{ color:var(--accent); }
+
+  .arrow-lane{ width:100%; height:44px; display:block; margin-top:-2px; }
+  .arrow-lane path{
+    fill:none;
+    stroke:var(--accent);
+    stroke-width:2;
+    opacity:.75;
+  }
+  .arrow-lane path.src2{ stroke:var(--accent-2); }
+
+  .legend{
+    display:flex; gap:18px; flex-wrap:wrap;
+    margin-top:16px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .swatch.target{ background:var(--accent); }
+  .swatch.src{ background:var(--accent-2); }
+  .swatch.idle{ background:var(--line); }
+
+  /* ---------- live code panel ---------- */
+  .trace-lower{
+    display:flex;
+    gap:14px;
+    margin-top:22px;
+    flex-wrap:wrap;
+    align-items:stretch;
+  }
+  .code-live{
+    flex:1 1 300px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .code-live-head{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 14px;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .code-live pre{ margin:0; padding:8px 0; overflow-x:auto; }
+  .code-live code{ font-family:"IBM Plex Mono", monospace; font-size:13px; }
+  .cline{
+    display:flex;
+    align-items:baseline;
+    padding:2px 14px;
+    border-left:3px solid transparent;
+    white-space:pre;
+    color:var(--ink-faint);
+    transition:background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .cline .mk{ width:13px; display:inline-block; color:var(--accent); font-size:10px; flex:0 0 auto;}
+  .cline .ln{ width:16px; display:inline-block; color:var(--ink-faint); font-size:11px; margin-right:10px; user-select:none; flex:0 0 auto;}
+  .cline.active{ background:var(--accent-soft); border-left-color:var(--accent); color:var(--ink); }
+  .cline.active .ln{ color:var(--accent); }
+  .cline .kw{ color:var(--accent-2); }
+  .cline .num{ color:var(--accent); }
+
+  /* ---------- variables watch panel ---------- */
+  .vars-panel{
+    flex:0 1 190px;
+    min-width:150px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .vars-head{
+    padding:8px 14px;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .vars-grid{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    padding:6px 0;
+  }
+  .var-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:4px 14px;
+    gap:10px;
+    transition:background .2s ease;
+  }
+  .var-row.changed{ background:var(--accent-soft); }
+  .var-name{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .var-val{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .var-row.dim .var-val{ color:var(--ink-faint); font-weight:400; }
+  .var-row.changed .var-val{ color:var(--accent); }
+
+  .caption{
+    margin-top:20px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:15px;
+    color:var(--ink);
+    min-height:22px;
+    line-height:1.5;
+  }
+
+  /* ---------- controls ---------- */
+  .controls{
+    margin-top:18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .btn{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:13px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:8px;
+    padding:8px 13px;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .btn:hover{ border-color:var(--accent-2); }
+  .btn:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .btn.play{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+    min-width:76px;
+  }
+  .btn.play:hover{ opacity:.88; }
+  input[type=range]{
+    flex:1;
+    accent-color:var(--accent);
+  }
+  .step-label{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    min-width:64px;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- explainer / proof ---------- */
+  .explainer h2{
+    font-family:"Fraunces", Georgia, serif;
+    font-weight:560;
+    font-size:19px;
+    margin:0 0 10px;
+  }
+  .explainer p{
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1.65;
+    max-width:64ch;
+    margin:0 0 14px;
+  }
+  .explainer code{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:.92em;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 5px;
+    color:var(--ink);
+  }
+
+  /* ---------- worked example: every real sequence for n=3, as an actual stack ---------- */
+  .worked-example{ margin:20px 0 4px; }
+  .wx-group{ margin-bottom:22px; }
+  .wx-group:last-child{ margin-bottom:10px; }
+  .wx-group-head{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding-bottom:8px; margin-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .wx-group-head .wx-j{ font-family:"IBM Plex Mono", monospace; font-size:14px; font-weight:700; color:var(--ink); }
+  .wx-group-head .wx-formula{ font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--ink-soft); }
+  .wx-group-head .wx-when{ font-size:12.5px; color:var(--ink-faint); }
+
+  .wx-row{ margin-bottom:16px; }
+  .wx-row:last-child{ margin-bottom:0; }
+  .wx-row-head{
+    display:flex; align-items:baseline; gap:8px; margin-bottom:8px;
+    font-family:"IBM Plex Mono", monospace; font-size:12px; color:var(--ink-soft);
+  }
+  .wx-row-head .wx-output{ font-size:16px; font-weight:700; color:var(--ink); letter-spacing:.02em; }
+
+  .wx-strip{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 6px; }
+  .wx-frame{ flex:0 0 auto; width:50px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .wx-tower{
+    width:32px; height:58px;
+    border:1.5px solid var(--line); border-radius:4px 4px 8px 8px;
+    background:var(--paper);
+    display:flex; flex-direction:column-reverse; overflow:hidden;
+  }
+  .wx-block{
+    flex:0 0 18px; width:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"IBM Plex Mono", monospace; font-size:11.5px; font-weight:700;
+    color:var(--paper); border-top:1px solid var(--paper-raise);
+  }
+  .wx-block.b-1{ background:var(--ink); }
+  .wx-block.b-a{ background:var(--accent-2); }
+  .wx-block.b-b{ background:var(--accent); }
+  .wx-op{ font-family:"IBM Plex Mono", monospace; font-size:10px; color:var(--ink-faint); white-space:nowrap; height:12px; }
+  .wx-op.op-fixed{ color:var(--ink); font-weight:700; }
+  .wx-out{ font-family:"IBM Plex Mono", monospace; font-size:10.5px; color:var(--ink-faint); min-height:13px; letter-spacing:.02em; }
+  .wx-out b{ color:var(--ink); }
+
+  /* ---------- alt schematic: the "who pops last" timeline ---------- */
+  .alt-schematic{ margin:18px 0 6px; }
+  .alt-timeline{ display:flex; align-items:stretch; gap:6px; flex-wrap:wrap; }
+  .alt-seg{
+    border-radius:8px; padding:10px 12px; font-family:"IBM Plex Mono", monospace;
+    display:flex; flex-direction:column; justify-content:center; gap:3px;
+  }
+  .alt-seg strong{ font-size:12.5px; }
+  .alt-seg small{ font-size:10.5px; font-weight:400; line-height:1.4; }
+  .alt-seg.front{ flex:1.2 1 160px; background:var(--accent-2-soft); border:1.5px dashed var(--accent-2); color:var(--accent-2); }
+  .alt-seg.front small, .alt-seg.backg small{ color:var(--ink-soft); }
+  .alt-seg.backg{ flex:1.2 1 200px; background:var(--accent-soft); border:1.5px dashed var(--accent); color:var(--accent); }
+  .alt-seg.ballk{
+    flex:0 0 auto; align-items:center; text-align:center; justify-content:center;
+    background:var(--paper); border:1.5px solid var(--ink); color:var(--ink);
+    font-size:12.5px; font-weight:700; white-space:nowrap;
+  }
+  .alt-seg.ballk span{ display:block; font-size:10px; font-weight:400; color:var(--ink-faint); margin-top:2px; }
+  .alt-arrow{ align-self:center; font-size:16px; color:var(--ink-faint); flex:0 0 auto; }
+
+  .wx-legend{
+    display:flex; gap:16px; flex-wrap:wrap; margin:2px 0 22px;
+    font-size:12px; color:var(--ink-soft);
+  }
+  .wx-legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .wx-legend .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .wx-legend .swatch.one{ background:var(--ink); }
+  .wx-legend .swatch.a{ background:var(--accent-2); }
+  .wx-legend .swatch.b{ background:var(--accent); }
+
+  .proof-sum{
+    margin-top:8px; padding-top:16px; border-top:1px solid var(--line);
+    font-family:"IBM Plex Mono", monospace; text-align:center; font-size:15px; color:var(--ink-soft);
+  }
+  .proof-sum strong{ color:var(--accent); font-size:18px; }
+
+  footer{
+    color:var(--ink-faint);
+    font-size:12.5px;
+    text-align:center;
+  }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Luogu P1044 &middot; NOIP 2003 普及组 &middot; 栈</div>
+    <h1>Stack Permutation Trace</h1>
+    <p class="recap">
+      A sequence <b>1..n</b> is pushed onto a stack in order and popped in any
+      valid order. <b>h[i]</b> counts the distinct output sequences for length
+      <b>i</b> &mdash; the <b>i</b>-th Catalan number. Pick any <b>n</b> from
+      1&ndash;10 below and step through its DP and live source line, then see the
+      recurrence proved with real numbers further down. All of it replays one real
+      run of the compiled binary at <b>n = 10</b> &mdash; nothing here is
+      recomputed in JavaScript.
+    </p>
+    <div class="budget">n &le; 18 &rarr; <strong>O(n&sup2;)</strong> is comfortable at any limit</div>
+  </header>
+
+  <section class="panel" aria-label="DP execution trace">
+    <div class="panel-head">
+      <h2>Execution trace</h2>
+      <div class="n-control">
+        <label for="nInput">n</label>
+        <button class="n-btn" id="nDown" title="n − 1" aria-label="decrease n">&minus;</button>
+        <input type="number" id="nInput" min="1" max="10" value="4" inputmode="numeric">
+        <button class="n-btn" id="nUp" title="n + 1" aria-label="increase n">&plus;</button>
+        <span class="n-hint">1&ndash;10</span>
+      </div>
+    </div>
+
+    <div class="formula" id="formula"></div>
+
+    <div class="row-wrap">
+      <div class="box-row" id="boxRow"></div>
+      <svg class="arrow-lane" id="arrowLane" viewBox="0 0 1000 90" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch target"></i>being written (h[i])</span>
+      <span><i class="swatch src"></i>source term (h[j], h[i-1-j])</span>
+      <span><i class="swatch idle"></i>not yet reached</span>
+    </div>
+
+    <div class="trace-lower">
+      <div class="code-live">
+        <div class="code-live-head">
+          <span>P1044.cpp</span>
+          <span id="lineLabel">line 2</span>
+        </div>
+        <pre><code
+          ><span class="cline" id="line-1"><span class="mk"></span><span class="ln">1</span><span class="kw">int</span> h[20] = {0};</span
+          ><span class="cline" id="line-2"><span class="mk"></span><span class="ln">2</span>h[0] = <span class="num">1</span>;</span
+          ><span class="cline" id="line-3"><span class="mk"></span><span class="ln">3</span>h[1] = <span class="num">1</span>;</span
+          ><span class="cline" id="line-4"><span class="mk"></span><span class="ln">4</span><span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt;= n; i++)</span
+          ><span class="cline" id="line-5"><span class="mk"></span><span class="ln">5</span>    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt; i; j++)</span
+          ><span class="cline" id="line-6"><span class="mk"></span><span class="ln">6</span>        h[i] += h[j] * h[i-<span class="num">1</span>-j];</span
+          ><span class="cline" id="line-7"><span class="mk"></span><span class="ln">7</span><span class="kw">cout</span> &lt;&lt; h[n];</span
+        ></code></pre>
+      </div>
+
+      <div class="vars-panel">
+        <div class="vars-head">variables</div>
+        <div class="vars-grid" id="varsGrid"></div>
+      </div>
+    </div>
+
+    <p class="caption" id="caption"></p>
+
+    <div class="controls">
+      <button class="btn" id="prevBtn" title="Previous step (←)">&larr; prev</button>
+      <button class="btn play" id="playBtn" title="Play / pause">Play</button>
+      <button class="btn" id="nextBtn" title="Next step (→)">next &rarr;</button>
+      <input type="range" id="scrub" min="0" value="0" step="1">
+      <span class="step-label" id="stepLabel">1 / 1</span>
+    </div>
+  </section>
+
+  <section class="explainer">
+    <h2>Proof: why h[i] = &sum; h[j]&middot;h[i&minus;1&minus;j]</h2>
+    <p>
+      Element <b>1</b> is always pushed first &mdash; there's nothing else to push yet.
+      It sits at the bottom of the stack until, at some point, it finally gets popped.
+      That one moment splits every sequence into two independent pieces:
+      <code>push(1)</code>, then <b>A</b> &mdash; whatever happens while 1 is still
+      buried underneath &mdash; then <code>pop(1)</code>, then <b>B</b> &mdash;
+      whatever happens after the stack is empty again.
+    </p>
+    <p>
+      <b>A</b> can't touch 1 (it's stuck on the bottom), so A is just a smaller,
+      self-contained stack run on the next <code>j</code> elements: <code>h[j]</code>
+      ways. The instant 1 pops, the stack is empty, so <b>B</b> is a fresh,
+      independent run on the remaining <code>i&minus;1&minus;j</code> elements:
+      <code>h[i&minus;1&minus;j]</code> ways. Different <code>j</code> means 1 pops at
+      a different moment, so these groups never overlap &mdash; summing them counts
+      every sequence exactly once.
+    </p>
+    <p>
+      Below is <i>every single</i> valid sequence for <b>n = 3</b> &mdash; all 5 of
+      them, actually simulated, grouped by when element <b>1</b> (dark block) leaves
+      the stack. Watch the output line at the bottom of each strip fill in as blocks
+      pop off.
+    </p>
+
+    <div class="wx-legend">
+      <span><i class="swatch one"></i>element 1 &mdash; the fixed push/pop</span>
+      <span><i class="swatch a"></i>A &mdash; finishes before 1 pops</span>
+      <span><i class="swatch b"></i>B &mdash; starts after 1 pops</span>
+    </div>
+
+    <div class="worked-example" id="workedExample"></div>
+    <div class="proof-sum" id="proofSum"></div>
+  </section>
+
+  <section class="explainer">
+    <h2>The dual proof: condition on who pops last</h2>
+    <p>
+      Textbooks often run this the other way round (入管 = enter the tube = push,
+      出管 = exit the tube = pop): instead of asking "when does the first ball
+      leave," ask <b>"which ball leaves last?"</b> Call that ball <b>k</b> &mdash;
+      it was the <code>k</code>-th one pushed.
+    </p>
+    <p>
+      If ball <code>k</code> is popped dead last, the stack must be completely
+      <i>empty</i> right before <code>k</code> is even pushed &mdash; otherwise
+      whatever's still sitting under where <code>k</code> would go could only come
+      out <i>after</i> k, contradicting "k is last." So balls <code>1..k&minus;1</code>
+      must already be fully pushed <i>and</i> popped by then: a self-contained run,
+      <code>h[k&minus;1]</code> ways. Then <code>k</code> goes on the stack, balls
+      <code>k+1..n</code> run their own self-contained sequence on top of it
+      (<code>h[n&minus;k]</code> ways), and only then does <code>k</code> finally pop:
+    </p>
+
+    <div class="alt-schematic" id="altSchematic"></div>
+
+    <p>
+      Exactly one ball is last, so summing over every possible <code>k</code> counts
+      each sequence once: <code>h[n] = &sum;<sub>k=1..n</sub> h[k&minus;1]&middot;h[n&minus;k]</code>
+      &mdash; substitute <code>j = k&minus;1</code> and it's the identical formula as before.
+    </p>
+
+    <div class="wx-legend">
+      <span><i class="swatch one"></i>ball k &mdash; the fixed pivot, pops last</span>
+      <span><i class="swatch a"></i>balls 1..k&minus;1 &mdash; done before k is pushed</span>
+      <span><i class="swatch b"></i>balls k+1..n &mdash; run while k waits below</span>
+    </div>
+
+    <div class="worked-example" id="workedExample2"></div>
+    <div class="proof-sum" id="proofSum2"></div>
+  </section>
+
+  <footer>65 frames captured from one real run of the compiled binary (-DTRACE build, input n = 10) &middot; every n below is a slice of that same run</footer>
+</div>
+
+<script>
+  // one real run of the compiled binary, input n = 10 — the DP loop computes
+  // h[2..10] sequentially on the way there, so this single capture already
+  // contains every step needed for any n from 1 to 10.
+  const MIN_N = 1, MAX_N = 10;
+  const allFrames = [
+{"step":0,"i":0,"val":1,"line":2,"desc":"base case h[0] = 1 (empty sequence, one way)"}
+,{"step":1,"i":1,"val":1,"line":3,"desc":"base case h[1] = 1 (one element, one way)"}
+,{"step":2,"i":2,"j":0,"left":0,"right":1,"leftVal":1,"rightVal":1,"term":1,"before":0,"after":1,"line":6,"desc":"h[2] += h[0]*h[1] = 1*1 = 1  (h[2]: 0 -> 1)"}
+,{"step":3,"i":2,"j":1,"left":1,"right":0,"leftVal":1,"rightVal":1,"term":1,"before":1,"after":2,"line":6,"desc":"h[2] += h[1]*h[0] = 1*1 = 1  (h[2]: 1 -> 2)"}
+,{"step":4,"i":2,"val":2,"line":4,"desc":"h[2] complete = 2"}
+,{"step":5,"i":3,"j":0,"left":0,"right":2,"leftVal":1,"rightVal":2,"term":2,"before":0,"after":2,"line":6,"desc":"h[3] += h[0]*h[2] = 1*2 = 2  (h[3]: 0 -> 2)"}
+,{"step":6,"i":3,"j":1,"left":1,"right":1,"leftVal":1,"rightVal":1,"term":1,"before":2,"after":3,"line":6,"desc":"h[3] += h[1]*h[1] = 1*1 = 1  (h[3]: 2 -> 3)"}
+,{"step":7,"i":3,"j":2,"left":2,"right":0,"leftVal":2,"rightVal":1,"term":2,"before":3,"after":5,"line":6,"desc":"h[3] += h[2]*h[0] = 2*1 = 2  (h[3]: 3 -> 5)"}
+,{"step":8,"i":3,"val":5,"line":4,"desc":"h[3] complete = 5"}
+,{"step":9,"i":4,"j":0,"left":0,"right":3,"leftVal":1,"rightVal":5,"term":5,"before":0,"after":5,"line":6,"desc":"h[4] += h[0]*h[3] = 1*5 = 5  (h[4]: 0 -> 5)"}
+,{"step":10,"i":4,"j":1,"left":1,"right":2,"leftVal":1,"rightVal":2,"term":2,"before":5,"after":7,"line":6,"desc":"h[4] += h[1]*h[2] = 1*2 = 2  (h[4]: 5 -> 7)"}
+,{"step":11,"i":4,"j":2,"left":2,"right":1,"leftVal":2,"rightVal":1,"term":2,"before":7,"after":9,"line":6,"desc":"h[4] += h[2]*h[1] = 2*1 = 2  (h[4]: 7 -> 9)"}
+,{"step":12,"i":4,"j":3,"left":3,"right":0,"leftVal":5,"rightVal":1,"term":5,"before":9,"after":14,"line":6,"desc":"h[4] += h[3]*h[0] = 5*1 = 5  (h[4]: 9 -> 14)"}
+,{"step":13,"i":4,"val":14,"line":4,"desc":"h[4] complete = 14"}
+,{"step":14,"i":5,"j":0,"left":0,"right":4,"leftVal":1,"rightVal":14,"term":14,"before":0,"after":14,"line":6,"desc":"h[5] += h[0]*h[4] = 1*14 = 14  (h[5]: 0 -> 14)"}
+,{"step":15,"i":5,"j":1,"left":1,"right":3,"leftVal":1,"rightVal":5,"term":5,"before":14,"after":19,"line":6,"desc":"h[5] += h[1]*h[3] = 1*5 = 5  (h[5]: 14 -> 19)"}
+,{"step":16,"i":5,"j":2,"left":2,"right":2,"leftVal":2,"rightVal":2,"term":4,"before":19,"after":23,"line":6,"desc":"h[5] += h[2]*h[2] = 2*2 = 4  (h[5]: 19 -> 23)"}
+,{"step":17,"i":5,"j":3,"left":3,"right":1,"leftVal":5,"rightVal":1,"term":5,"before":23,"after":28,"line":6,"desc":"h[5] += h[3]*h[1] = 5*1 = 5  (h[5]: 23 -> 28)"}
+,{"step":18,"i":5,"j":4,"left":4,"right":0,"leftVal":14,"rightVal":1,"term":14,"before":28,"after":42,"line":6,"desc":"h[5] += h[4]*h[0] = 14*1 = 14  (h[5]: 28 -> 42)"}
+,{"step":19,"i":5,"val":42,"line":4,"desc":"h[5] complete = 42"}
+,{"step":20,"i":6,"j":0,"left":0,"right":5,"leftVal":1,"rightVal":42,"term":42,"before":0,"after":42,"line":6,"desc":"h[6] += h[0]*h[5] = 1*42 = 42  (h[6]: 0 -> 42)"}
+,{"step":21,"i":6,"j":1,"left":1,"right":4,"leftVal":1,"rightVal":14,"term":14,"before":42,"after":56,"line":6,"desc":"h[6] += h[1]*h[4] = 1*14 = 14  (h[6]: 42 -> 56)"}
+,{"step":22,"i":6,"j":2,"left":2,"right":3,"leftVal":2,"rightVal":5,"term":10,"before":56,"after":66,"line":6,"desc":"h[6] += h[2]*h[3] = 2*5 = 10  (h[6]: 56 -> 66)"}
+,{"step":23,"i":6,"j":3,"left":3,"right":2,"leftVal":5,"rightVal":2,"term":10,"before":66,"after":76,"line":6,"desc":"h[6] += h[3]*h[2] = 5*2 = 10  (h[6]: 66 -> 76)"}
+,{"step":24,"i":6,"j":4,"left":4,"right":1,"leftVal":14,"rightVal":1,"term":14,"before":76,"after":90,"line":6,"desc":"h[6] += h[4]*h[1] = 14*1 = 14  (h[6]: 76 -> 90)"}
+,{"step":25,"i":6,"j":5,"left":5,"right":0,"leftVal":42,"rightVal":1,"term":42,"before":90,"after":132,"line":6,"desc":"h[6] += h[5]*h[0] = 42*1 = 42  (h[6]: 90 -> 132)"}
+,{"step":26,"i":6,"val":132,"line":4,"desc":"h[6] complete = 132"}
+,{"step":27,"i":7,"j":0,"left":0,"right":6,"leftVal":1,"rightVal":132,"term":132,"before":0,"after":132,"line":6,"desc":"h[7] += h[0]*h[6] = 1*132 = 132  (h[7]: 0 -> 132)"}
+,{"step":28,"i":7,"j":1,"left":1,"right":5,"leftVal":1,"rightVal":42,"term":42,"before":132,"after":174,"line":6,"desc":"h[7] += h[1]*h[5] = 1*42 = 42  (h[7]: 132 -> 174)"}
+,{"step":29,"i":7,"j":2,"left":2,"right":4,"leftVal":2,"rightVal":14,"term":28,"before":174,"after":202,"line":6,"desc":"h[7] += h[2]*h[4] = 2*14 = 28  (h[7]: 174 -> 202)"}
+,{"step":30,"i":7,"j":3,"left":3,"right":3,"leftVal":5,"rightVal":5,"term":25,"before":202,"after":227,"line":6,"desc":"h[7] += h[3]*h[3] = 5*5 = 25  (h[7]: 202 -> 227)"}
+,{"step":31,"i":7,"j":4,"left":4,"right":2,"leftVal":14,"rightVal":2,"term":28,"before":227,"after":255,"line":6,"desc":"h[7] += h[4]*h[2] = 14*2 = 28  (h[7]: 227 -> 255)"}
+,{"step":32,"i":7,"j":5,"left":5,"right":1,"leftVal":42,"rightVal":1,"term":42,"before":255,"after":297,"line":6,"desc":"h[7] += h[5]*h[1] = 42*1 = 42  (h[7]: 255 -> 297)"}
+,{"step":33,"i":7,"j":6,"left":6,"right":0,"leftVal":132,"rightVal":1,"term":132,"before":297,"after":429,"line":6,"desc":"h[7] += h[6]*h[0] = 132*1 = 132  (h[7]: 297 -> 429)"}
+,{"step":34,"i":7,"val":429,"line":4,"desc":"h[7] complete = 429"}
+,{"step":35,"i":8,"j":0,"left":0,"right":7,"leftVal":1,"rightVal":429,"term":429,"before":0,"after":429,"line":6,"desc":"h[8] += h[0]*h[7] = 1*429 = 429  (h[8]: 0 -> 429)"}
+,{"step":36,"i":8,"j":1,"left":1,"right":6,"leftVal":1,"rightVal":132,"term":132,"before":429,"after":561,"line":6,"desc":"h[8] += h[1]*h[6] = 1*132 = 132  (h[8]: 429 -> 561)"}
+,{"step":37,"i":8,"j":2,"left":2,"right":5,"leftVal":2,"rightVal":42,"term":84,"before":561,"after":645,"line":6,"desc":"h[8] += h[2]*h[5] = 2*42 = 84  (h[8]: 561 -> 645)"}
+,{"step":38,"i":8,"j":3,"left":3,"right":4,"leftVal":5,"rightVal":14,"term":70,"before":645,"after":715,"line":6,"desc":"h[8] += h[3]*h[4] = 5*14 = 70  (h[8]: 645 -> 715)"}
+,{"step":39,"i":8,"j":4,"left":4,"right":3,"leftVal":14,"rightVal":5,"term":70,"before":715,"after":785,"line":6,"desc":"h[8] += h[4]*h[3] = 14*5 = 70  (h[8]: 715 -> 785)"}
+,{"step":40,"i":8,"j":5,"left":5,"right":2,"leftVal":42,"rightVal":2,"term":84,"before":785,"after":869,"line":6,"desc":"h[8] += h[5]*h[2] = 42*2 = 84  (h[8]: 785 -> 869)"}
+,{"step":41,"i":8,"j":6,"left":6,"right":1,"leftVal":132,"rightVal":1,"term":132,"before":869,"after":1001,"line":6,"desc":"h[8] += h[6]*h[1] = 132*1 = 132  (h[8]: 869 -> 1001)"}
+,{"step":42,"i":8,"j":7,"left":7,"right":0,"leftVal":429,"rightVal":1,"term":429,"before":1001,"after":1430,"line":6,"desc":"h[8] += h[7]*h[0] = 429*1 = 429  (h[8]: 1001 -> 1430)"}
+,{"step":43,"i":8,"val":1430,"line":4,"desc":"h[8] complete = 1430"}
+,{"step":44,"i":9,"j":0,"left":0,"right":8,"leftVal":1,"rightVal":1430,"term":1430,"before":0,"after":1430,"line":6,"desc":"h[9] += h[0]*h[8] = 1*1430 = 1430  (h[9]: 0 -> 1430)"}
+,{"step":45,"i":9,"j":1,"left":1,"right":7,"leftVal":1,"rightVal":429,"term":429,"before":1430,"after":1859,"line":6,"desc":"h[9] += h[1]*h[7] = 1*429 = 429  (h[9]: 1430 -> 1859)"}
+,{"step":46,"i":9,"j":2,"left":2,"right":6,"leftVal":2,"rightVal":132,"term":264,"before":1859,"after":2123,"line":6,"desc":"h[9] += h[2]*h[6] = 2*132 = 264  (h[9]: 1859 -> 2123)"}
+,{"step":47,"i":9,"j":3,"left":3,"right":5,"leftVal":5,"rightVal":42,"term":210,"before":2123,"after":2333,"line":6,"desc":"h[9] += h[3]*h[5] = 5*42 = 210  (h[9]: 2123 -> 2333)"}
+,{"step":48,"i":9,"j":4,"left":4,"right":4,"leftVal":14,"rightVal":14,"term":196,"before":2333,"after":2529,"line":6,"desc":"h[9] += h[4]*h[4] = 14*14 = 196  (h[9]: 2333 -> 2529)"}
+,{"step":49,"i":9,"j":5,"left":5,"right":3,"leftVal":42,"rightVal":5,"term":210,"before":2529,"after":2739,"line":6,"desc":"h[9] += h[5]*h[3] = 42*5 = 210  (h[9]: 2529 -> 2739)"}
+,{"step":50,"i":9,"j":6,"left":6,"right":2,"leftVal":132,"rightVal":2,"term":264,"before":2739,"after":3003,"line":6,"desc":"h[9] += h[6]*h[2] = 132*2 = 264  (h[9]: 2739 -> 3003)"}
+,{"step":51,"i":9,"j":7,"left":7,"right":1,"leftVal":429,"rightVal":1,"term":429,"before":3003,"after":3432,"line":6,"desc":"h[9] += h[7]*h[1] = 429*1 = 429  (h[9]: 3003 -> 3432)"}
+,{"step":52,"i":9,"j":8,"left":8,"right":0,"leftVal":1430,"rightVal":1,"term":1430,"before":3432,"after":4862,"line":6,"desc":"h[9] += h[8]*h[0] = 1430*1 = 1430  (h[9]: 3432 -> 4862)"}
+,{"step":53,"i":9,"val":4862,"line":4,"desc":"h[9] complete = 4862"}
+,{"step":54,"i":10,"j":0,"left":0,"right":9,"leftVal":1,"rightVal":4862,"term":4862,"before":0,"after":4862,"line":6,"desc":"h[10] += h[0]*h[9] = 1*4862 = 4862  (h[10]: 0 -> 4862)"}
+,{"step":55,"i":10,"j":1,"left":1,"right":8,"leftVal":1,"rightVal":1430,"term":1430,"before":4862,"after":6292,"line":6,"desc":"h[10] += h[1]*h[8] = 1*1430 = 1430  (h[10]: 4862 -> 6292)"}
+,{"step":56,"i":10,"j":2,"left":2,"right":7,"leftVal":2,"rightVal":429,"term":858,"before":6292,"after":7150,"line":6,"desc":"h[10] += h[2]*h[7] = 2*429 = 858  (h[10]: 6292 -> 7150)"}
+,{"step":57,"i":10,"j":3,"left":3,"right":6,"leftVal":5,"rightVal":132,"term":660,"before":7150,"after":7810,"line":6,"desc":"h[10] += h[3]*h[6] = 5*132 = 660  (h[10]: 7150 -> 7810)"}
+,{"step":58,"i":10,"j":4,"left":4,"right":5,"leftVal":14,"rightVal":42,"term":588,"before":7810,"after":8398,"line":6,"desc":"h[10] += h[4]*h[5] = 14*42 = 588  (h[10]: 7810 -> 8398)"}
+,{"step":59,"i":10,"j":5,"left":5,"right":4,"leftVal":42,"rightVal":14,"term":588,"before":8398,"after":8986,"line":6,"desc":"h[10] += h[5]*h[4] = 42*14 = 588  (h[10]: 8398 -> 8986)"}
+,{"step":60,"i":10,"j":6,"left":6,"right":3,"leftVal":132,"rightVal":5,"term":660,"before":8986,"after":9646,"line":6,"desc":"h[10] += h[6]*h[3] = 132*5 = 660  (h[10]: 8986 -> 9646)"}
+,{"step":61,"i":10,"j":7,"left":7,"right":2,"leftVal":429,"rightVal":2,"term":858,"before":9646,"after":10504,"line":6,"desc":"h[10] += h[7]*h[2] = 429*2 = 858  (h[10]: 9646 -> 10504)"}
+,{"step":62,"i":10,"j":8,"left":8,"right":1,"leftVal":1430,"rightVal":1,"term":1430,"before":10504,"after":11934,"line":6,"desc":"h[10] += h[8]*h[1] = 1430*1 = 1430  (h[10]: 10504 -> 11934)"}
+,{"step":63,"i":10,"j":9,"left":9,"right":0,"leftVal":4862,"rightVal":1,"term":4862,"before":11934,"after":16796,"line":6,"desc":"h[10] += h[9]*h[0] = 4862*1 = 4862  (h[10]: 11934 -> 16796)"}
+,{"step":64,"i":10,"val":16796,"line":4,"desc":"h[10] complete = 16796"}
+  ];
+
+  let curN = 4;
+  let frames = allFrames.filter(f => f.i <= curN);
+
+  const boxRow  = document.getElementById('boxRow');
+  const arrowLane = document.getElementById('arrowLane');
+  const formula = document.getElementById('formula');
+  const caption = document.getElementById('caption');
+  const scrub = document.getElementById('scrub');
+  const stepLabel = document.getElementById('stepLabel');
+  const playBtn = document.getElementById('playBtn');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const lineLabel = document.getElementById('lineLabel');
+  const nInput = document.getElementById('nInput');
+  const nUp = document.getElementById('nUp');
+  const nDown = document.getElementById('nDown');
+
+  function rebuildBoxRow(n){
+    boxRow.innerHTML = '';
+    for (let k = 0; k <= n; k++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = 'cell-' + k;
+      cell.innerHTML = '<div class="idx">h[' + k + ']</div><div class="val">–</div>';
+      boxRow.appendChild(cell);
+    }
+  }
+
+  function colCenter(k){ return (k + 0.5) / (curN + 1) * 1000; }
+
+  let idx = 0, playing = false, timer = null;
+
+  function render(i){
+    idx = i;
+    const hVals = {};
+    for (let s = 0; s <= i; s++){
+      const f = frames[s];
+      if (f.after !== undefined) hVals[f.i] = f.after;
+      else if (f.val !== undefined) hVals[f.i] = f.val;
+    }
+    const f = frames[i];
+
+    for (let k = 0; k <= curN; k++){
+      const cell = document.getElementById('cell-' + k);
+      cell.classList.remove('src', 'target', 'has-val');
+      const v = hVals[k];
+      cell.querySelector('.val').textContent = (v === undefined) ? '–' : v;
+      if (v !== undefined) cell.classList.add('has-val');
+    }
+
+    arrowLane.innerHTML = '';
+
+    if (f.j !== undefined){
+      document.getElementById('cell-' + f.i).classList.add('target');
+      const srcs = [...new Set([f.left, f.right])];
+      srcs.forEach(s => document.getElementById('cell-' + s).classList.add('src'));
+
+      const tx = colCenter(f.i);
+      srcs.forEach((s, n) => {
+        const sx = colCenter(s);
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        const midY = 78;
+        path.setAttribute('d', `M ${sx} 4 C ${sx} ${midY}, ${tx} ${midY}, ${tx} 4`);
+        if (n === 1) path.setAttribute('class', 'src2');
+        arrowLane.appendChild(path);
+      });
+
+      formula.innerHTML =
+        `h[${f.i}] <span class="op">+=</span> h[${f.left}]&middot;h[${f.right}]` +
+        `<span class="arrow-eq">=</span><span class="j-val">${f.leftVal}</span>&middot;<span class="j-val">${f.rightVal}</span>` +
+        `<span class="arrow-eq">=</span><span class="term-val">${f.term}</span>` +
+        `<span class="arrow-eq">&rarr;</span> h[${f.i}]: ${f.before} &rarr; <span class="term-val">${f.after}</span>`;
+    } else {
+      document.getElementById('cell-' + f.i).classList.add('target');
+      if (f.desc.startsWith('output')){
+        formula.innerHTML = `<span class="arrow-eq">cout &lt;&lt;</span> h[${f.i}] <span class="op">=</span> <span class="term-val">${f.val}</span> <span class="arrow-eq">&larr; answer</span>`;
+      } else if (f.desc.includes('complete')){
+        formula.innerHTML = `h[${f.i}] <span class="op">=</span> <span class="term-val">${f.val}</span> <span class="arrow-eq">✓</span>`;
+      } else {
+        formula.innerHTML = `h[${f.i}] <span class="op">=</span> <span class="term-val">${f.val}</span> <span class="arrow-eq">(base case)</span>`;
+      }
+    }
+
+    document.querySelectorAll('.cline').forEach(el => el.classList.remove('active'));
+    const activeLine = document.getElementById('line-' + f.line);
+    if (activeLine) activeLine.classList.add('active');
+    lineLabel.textContent = 'line ' + f.line;
+
+    updateVars(f);
+
+    caption.textContent = f.desc;
+    scrub.value = i;
+    stepLabel.textContent = (i + 1) + ' / ' + frames.length;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === frames.length - 1;
+    if (i === frames.length - 1) stopPlay();
+  }
+
+  // mirrors the actual C++ locals at this point in the run: n is the cin>>n
+  // input, i/j are the loop counters, h[j]/h[i-1-j] are the two operands just
+  // read, h[i] is the accumulator's value right now (mid-sum, or final).
+  function updateVars(f){
+    const rows = [];
+    rows.push(['n', curN, false, false]);
+    rows.push(['i', f.i, false, false]);
+    if (f.j !== undefined){
+      rows.push(['j', f.j, true, false]);
+      rows.push(['h[j]', f.leftVal, true, false]);
+      rows.push(['h[i-1-j]', f.rightVal, true, false]);
+      rows.push(['h[i]', f.after, true, false]);
+    } else {
+      rows.push(['j', '—', false, true]);
+      rows.push(['h[j]', '—', false, true]);
+      rows.push(['h[i-1-j]', '—', false, true]);
+      rows.push(['h[i]', f.val, true, false]);
+    }
+    document.getElementById('varsGrid').innerHTML = rows.map(([name, val, changed, dim]) =>
+      `<div class="var-row${changed ? ' changed' : ''}${dim ? ' dim' : ''}">` +
+        `<span class="var-name">${name}</span><span class="var-val">${val}</span>` +
+      `</div>`
+    ).join('');
+  }
+
+  function step(delta){
+    render(Math.min(frames.length - 1, Math.max(0, idx + delta)));
+  }
+
+  function startPlay(){
+    playing = true;
+    playBtn.textContent = 'Pause';
+    timer = setInterval(() => {
+      if (idx >= frames.length - 1){ stopPlay(); return; }
+      step(1);
+    }, 1300);
+  }
+  function stopPlay(){
+    playing = false;
+    playBtn.textContent = 'Play';
+    clearInterval(timer);
+  }
+
+  prevBtn.addEventListener('click', () => { stopPlay(); step(-1); });
+  nextBtn.addEventListener('click', () => { stopPlay(); step(1); });
+  playBtn.addEventListener('click', () => playing ? stopPlay() : startPlay());
+  scrub.addEventListener('input', (e) => { stopPlay(); render(Number(e.target.value)); });
+  document.addEventListener('keydown', (e) => {
+    if (e.target === nInput) return; // let the n field handle its own arrow keys
+    if (e.key === 'ArrowLeft'){ stopPlay(); step(-1); }
+    if (e.key === 'ArrowRight'){ stopPlay(); step(1); }
+    if (e.key === ' '){ e.preventDefault(); playing ? stopPlay() : startPlay(); }
+  });
+
+  // ---------- worked example: every real sequence for n=3, actually simulated ----------
+
+  // ops: array of ['push', value] or ['pop']. Frame 0 is the empty stack before
+  // anything happens; frame k is the state right after ops[k-1].
+  function simulateOps(ops){
+    const stack = [], out = [];
+    const frames = [{ stack: stack.slice(), op: null, out: out.slice() }];
+    ops.forEach(o => {
+      if (o[0] === 'push') stack.push(o[1]);
+      else out.push(stack.pop());
+      frames.push({ stack: stack.slice(), op: o, out: out.slice() });
+    });
+    return frames;
+  }
+
+  // classify(v) returns '1' for the pivot ball (drawn dark), 'a' for its "front"
+  // group, 'b' for its "back" group — lets the same renderer serve either proof.
+  function buildWxRow(ops, classify){
+    const frames = simulateOps(ops);
+    const output = frames[frames.length - 1].out;
+
+    const row = document.createElement('div');
+    row.className = 'wx-row';
+
+    const head = document.createElement('div');
+    head.className = 'wx-row-head';
+    head.innerHTML = `<span class="wx-output">${output.join(', ')}</span><span>&larr; output</span>`;
+    row.appendChild(head);
+
+    const strip = document.createElement('div');
+    strip.className = 'wx-strip';
+
+    frames.forEach(f => {
+      const frame = document.createElement('div');
+      frame.className = 'wx-frame';
+
+      const tower = document.createElement('div');
+      tower.className = 'wx-tower';
+      f.stack.forEach(v => {
+        const block = document.createElement('div');
+        block.className = 'wx-block b-' + classify(v);
+        block.textContent = v;
+        tower.appendChild(block);
+      });
+      frame.appendChild(tower);
+
+      const opEl = document.createElement('div');
+      let isFixed = false;
+      if (f.op){
+        if (f.op[0] === 'push'){
+          opEl.textContent = '▲' + f.op[1];
+          isFixed = classify(f.op[1]) === '1';
+        } else {
+          const popped = f.out[f.out.length - 1];
+          opEl.textContent = '▼' + popped;
+          isFixed = classify(popped) === '1';
+        }
+      }
+      opEl.className = 'wx-op' + (isFixed ? ' op-fixed' : '');
+      frame.appendChild(opEl);
+
+      const outEl = document.createElement('div');
+      outEl.className = 'wx-out';
+      if (f.out.length){
+        outEl.innerHTML = f.out.map((v, idx) => idx === f.out.length - 1 ? `<b>${v}</b>` : v).join(',');
+      }
+      frame.appendChild(outEl);
+
+      strip.appendChild(frame);
+    });
+
+    row.appendChild(strip);
+    return row;
+  }
+
+  // all 5 valid sequences for n=3, hand-verified — the same 5 sequences get
+  // regrouped two different ways below (by when 1 pops, and by who pops last)
+  const wxSequences = [
+    { j: 0, ops: [['push',1],['pop'],['push',2],['pop'],['push',3],['pop']] },
+    { j: 0, ops: [['push',1],['pop'],['push',2],['push',3],['pop'],['pop']] },
+    { j: 1, ops: [['push',1],['push',2],['pop'],['pop'],['push',3],['pop']] },
+    { j: 2, ops: [['push',1],['push',2],['pop'],['push',3],['pop'],['pop']] },
+    { j: 2, ops: [['push',1],['push',2],['push',3],['pop'],['pop'],['pop']] },
+  ];
+  const wxHVals = [1, 1, 2, 5]; // h[0..3] — both worked examples are fixed at n = 3
+  const wxN = 3;
+
+  (function buildWorkedExample(){
+    const container = document.getElementById('workedExample');
+
+    [0, 1, 2].forEach(j => {
+      const groupSeqs = wxSequences.filter(s => s.j === j);
+      if (!groupSeqs.length) return;
+
+      const group = document.createElement('div');
+      group.className = 'wx-group';
+
+      const hi1j = wxHVals[wxN - 1 - j];
+      const whenText = j === 0
+        ? '1 pops immediately'
+        : `1 pops after ${j} element${j > 1 ? 's' : ''} finish${j === 1 ? 'es' : ''}`;
+
+      const head = document.createElement('div');
+      head.className = 'wx-group-head';
+      head.innerHTML =
+        `<span class="wx-j">j = ${j}</span>` +
+        `<span class="wx-formula">h[${j}]&middot;h[${wxN - 1 - j}] = ${wxHVals[j]}&middot;${hi1j} = ${wxHVals[j] * hi1j} ways</span>` +
+        `<span class="wx-when">${whenText}</span>`;
+      group.appendChild(head);
+
+      groupSeqs.forEach(s => {
+        const classify = v => v === 1 ? '1' : (v <= s.j + 1 ? 'a' : 'b');
+        group.appendChild(buildWxRow(s.ops, classify));
+      });
+      container.appendChild(group);
+    });
+
+    const counts = [0, 1, 2].map(j => wxSequences.filter(s => s.j === j).length);
+    document.getElementById('proofSum').innerHTML =
+      `h[3] = ` + counts.map((c, j) => `h[${j}]&middot;h[${2 - j}]`).join(' + ') +
+      ` = ` + counts.join(' + ') +
+      ` = <strong>${counts.reduce((a, b) => a + b, 0)}</strong>`;
+  })();
+
+  // ---------- the dual proof: condition on which ball pops LAST instead ----------
+  (function buildAltSchematic(){
+    document.getElementById('altSchematic').innerHTML = `
+      <div class="alt-timeline">
+        <div class="alt-seg front"><strong>1 .. k&minus;1</strong><small>pushed &amp; fully popped first &middot; h[k&minus;1] ways</small></div>
+        <div class="alt-arrow">&rarr;</div>
+        <div class="alt-seg ballk">&#9650; push k</div>
+        <div class="alt-seg backg"><strong>k+1 .. n</strong><small>pushed &amp; fully popped next, nested above k &middot; h[n&minus;k] ways</small></div>
+        <div class="alt-arrow">&rarr;</div>
+        <div class="alt-seg ballk">&#9660; pop k <span>&mdash; the very last op</span></div>
+      </div>`;
+  })();
+
+  (function buildAltGrouping(){
+    const container = document.getElementById('workedExample2');
+
+    const withK = wxSequences.map(s => {
+      const simFrames = simulateOps(s.ops);
+      const out = simFrames[simFrames.length - 1].out;
+      return { ops: s.ops, k: out[out.length - 1] };
+    });
+
+    [1, 2, 3].forEach(k => {
+      const groupSeqs = withK.filter(s => s.k === k);
+      if (!groupSeqs.length) return;
+
+      const front = k - 1, back = wxN - k;
+      const group = document.createElement('div');
+      group.className = 'wx-group';
+
+      const head = document.createElement('div');
+      head.className = 'wx-group-head';
+      head.innerHTML =
+        `<span class="wx-j">k = ${k}</span>` +
+        `<span class="wx-formula">h[${front}]&middot;h[${back}] = ${wxHVals[front]}&middot;${wxHVals[back]} = ${wxHVals[front] * wxHVals[back]} ways</span>` +
+        `<span class="wx-when">ball ${k} is the very last to pop</span>`;
+      group.appendChild(head);
+
+      groupSeqs.forEach(s => {
+        const classify = v => v === k ? '1' : (v < k ? 'a' : 'b');
+        group.appendChild(buildWxRow(s.ops, classify));
+      });
+      container.appendChild(group);
+    });
+
+    const counts = [1, 2, 3].map(k => withK.filter(s => s.k === k).length);
+    document.getElementById('proofSum2').innerHTML =
+      `h[3] = ` + counts.map((c, idx) => `h[${idx}]&middot;h[${2 - idx}]`).join(' + ') +
+      ` = ` + counts.join(' + ') +
+      ` = <strong>${counts.reduce((a, b) => a + b, 0)}</strong>`;
+  })();
+
+  // ---------- wire up the n control: everything above replays a slice of allFrames ----------
+  function applyN(rawN){
+    let n = Math.round(Number(rawN));
+    if (!Number.isFinite(n)) n = curN;
+    n = Math.max(MIN_N, Math.min(MAX_N, n));
+
+    curN = n;
+    nInput.value = n;
+    stopPlay();
+    frames = allFrames.filter(f => f.i <= n);
+    rebuildBoxRow(n);
+    scrub.max = frames.length - 1;
+    render(0);
+  }
+
+  nInput.addEventListener('change', () => applyN(nInput.value));
+  nInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') applyN(nInput.value); });
+  nUp.addEventListener('click', () => applyN(curN + 1));
+  nDown.addEventListener('click', () => applyN(curN - 1));
+
+  applyN(curN);
+</script>
+
+</body></html>

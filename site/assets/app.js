@@ -69,11 +69,49 @@ function setTitle(...parts) {
   document.title = [...parts, 'CP Learning Hub'].filter(Boolean).join(' · ');
 }
 
-const demoLinks = p => p.demos.map(d => `
-  <a class="demo" href="${esc(d.url)}" target="_blank" rel="noopener">
-    <span class="demo-name">${esc(d.name)} <span aria-hidden="true">↗</span></span>
-    <span class="demo-desc">${esc(d.desc)}</span>
-  </a>`).join('');
+// Size an embedded demo to its content and keep it in the site's theme.
+function fitFrame(frame) {
+  let doc;
+  try { doc = frame.contentDocument; } catch { return; }
+  if (!doc || !doc.body) return;
+  const style = doc.createElement('style');
+  style.textContent = 'body{min-height:0!important}';
+  doc.head.appendChild(style);
+  const theme = document.documentElement.dataset.theme;
+  if (theme) doc.documentElement.dataset.theme = theme;
+  const resize = () => { frame.style.height = doc.documentElement.scrollHeight + 'px'; };
+  resize();
+  new ResizeObserver(resize).observe(doc.body);
+}
+
+function demoSection(p) {
+  const tabs = p.demos.length > 1
+    ? `<div class="demo-tabs" role="tablist">${p.demos.map((d, i) => `
+        <button type="button" role="tab" class="demo-tab" data-i="${i}" aria-selected="${i === 0}">${esc(d.name)}</button>`).join('')}</div>`
+    : '';
+  return `
+    <section class="demo-section" aria-label="Interactive demo">
+      <div class="demo-bar">
+        ${tabs || `<h2 class="demo-title">${esc(p.demos[0].name)}</h2>`}
+        <a class="demo-open" id="demo-open" href="${esc(p.demos[0].page)}" target="_blank" rel="noopener">Open full page ↗</a>
+      </div>
+      <p class="demo-desc" id="demo-desc">${esc(p.demos[0].desc)}</p>
+      <iframe class="demo-frame" id="demo-frame" src="${esc(p.demos[0].page)}" title="${esc(p.demos[0].name)} demo"></iframe>
+    </section>`;
+}
+
+function wireDemos(p) {
+  const frame = $('#demo-frame');
+  frame.addEventListener('load', () => fitFrame(frame));
+  $$('.demo-tab', app).forEach(tab => tab.addEventListener('click', () => {
+    const d = p.demos[+tab.dataset.i];
+    $$('.demo-tab', app).forEach(t => t.setAttribute('aria-selected', t === tab));
+    frame.src = d.page;
+    frame.title = `${d.name} demo`;
+    $('#demo-open').href = d.page;
+    $('#demo-desc').textContent = d.desc;
+  }));
+}
 
 async function viewHome() {
   const projects = await getProjects();
@@ -82,7 +120,7 @@ async function viewHome() {
     <section class="hero">
       <p class="eyebrow">CP Learning Hub</p>
       <h1>Solved problems & interactive demos</h1>
-      <p class="lede">${projects.length} competitive programming projects. Each one has the full C++ solution, tested on the problem's sample, and a step-by-step demo you can play with.</p>
+      <p class="lede">${projects.length} competitive programming projects. Each one has a step-by-step interactive demo and the full C++ solution, tested on the problem's sample.</p>
     </section>
     <div class="project-grid">
       ${projects.map(p => `
@@ -94,12 +132,11 @@ async function viewHome() {
           <p class="summary">${esc(p.summary)}</p>
           <ul class="tags" aria-label="Topics">${p.tags.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
           <div class="card-actions">
-            <a class="btn primary" href="#/p/${esc(p.id)}">View code</a>
-            ${p.demos.map(d => `<a class="btn" href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.name)} ↗</a>`).join('')}
+            <a class="btn primary" href="#/p/${esc(p.id)}">Open project</a>
           </div>
         </article>`).join('')}
     </div>
-    <p class="note">Demo links open Claude artifacts. They are private until their owner shares them.</p>`;
+`;
 }
 
 async function viewProject(id) {
@@ -113,18 +150,22 @@ async function viewProject(id) {
   setTitle(`${p.code} ${p.title}`);
 
   app.innerHTML = `
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="#/">All projects</a><span aria-hidden="true">/</span><span>${esc(p.code)}</span></nav>
+    <header class="project-head">
+      <span class="pid">${esc(p.code)}</span>
+      <h1>${esc(p.title)}</h1>
+      <p class="lede">${esc(p.summary)}</p>
+    </header>
+    ${demoSection(p)}
     <div class="narrow">
-      <nav class="crumbs" aria-label="Breadcrumb"><a href="#/">All projects</a><span aria-hidden="true">/</span><span>${esc(p.code)}</span></nav>
-      <section class="demos-box" aria-label="Interactive demos">
-        <h2>Interactive demo${p.demos.length > 1 ? 's' : ''}</h2>
-        <div class="demo-list">${demoLinks(p)}</div>
-      </section>
+      <h2 class="section-label">Solution &amp; explanation</h2>
       <article class="prose">${renderMarkdown(md)}</article>
       <nav class="pager" aria-label="Project navigation">
         ${prev ? `<a class="prev" href="#/p/${esc(prev.id)}"><small>← Previous</small>${esc(prev.code)} ${esc(prev.title)}</a>` : ''}
         ${next ? `<a class="next" href="#/p/${esc(next.id)}"><small>Next →</small>${esc(next.code)} ${esc(next.title)}</a>` : ''}
       </nav>
     </div>`;
+  wireDemos(p);
   enhance($('.prose', app));
 }
 
@@ -156,6 +197,8 @@ $('#theme-toggle').addEventListener('click', () => {
   const next = dark ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   store.set('theme', next);
+  const frame = $('#demo-frame');
+  try { if (frame?.contentDocument) frame.contentDocument.documentElement.dataset.theme = next; } catch { /* cross-origin */ }
 });
 
 window.addEventListener('hashchange', route);

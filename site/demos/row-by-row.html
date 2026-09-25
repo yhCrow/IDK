@@ -1,0 +1,387 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Row by Row</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#efece2;
+    --surface:#f8f6ee;
+    --surface-2:#e6e1d0;
+    --ink:#262420;
+    --ink-dim:#746f5f;
+    --line:#d8d2bf;
+    --accent:#3f7a72;
+    --accent-ink:#1c332f;
+    --accent-bg:rgba(63,122,114,0.12);
+    --shadow:0 1px 2px rgba(30,28,20,0.06), 0 6px 20px -8px rgba(30,28,20,0.20);
+
+    --code-bg:#161d1b;
+    --code-gutter:#1c2422;
+    --code-ink:#e3ece9;
+    --code-dim:#6f8985;
+    --code-kw:#5fb0a5;
+    --code-str:#c9a15a;
+    --code-num:#7fa8c9;
+    --code-com:#5b6b67;
+    --code-cur-bg:rgba(95,176,165,0.20);
+    --code-cur-border:#5fb0a5;
+
+    --lcd-glass:#9fb49a;
+    --lcd-glass-2:#8fa589;
+    --lcd-off:#8fa48a;
+    --lcd-on:#22331f;
+    --lcd-unwritten:#b7c6b2;
+    --lcd-frame:#4b463a;
+    --lcd-frame-2:#3a362c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15140f;
+      --surface:#1c1b14;
+      --surface-2:#242319;
+      --ink:#eeece2;
+      --ink-dim:#a29c87;
+      --line:#3a382a;
+      --accent:#5fb0a5;
+      --accent-ink:#e7f7f4;
+      --accent-bg:rgba(95,176,165,0.16);
+      --shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15140f;
+    --surface:#1c1b14;
+    --surface-2:#242319;
+    --ink:#eeece2;
+    --ink-dim:#a29c87;
+    --line:#3a382a;
+    --accent:#5fb0a5;
+    --accent-ink:#e7f7f4;
+    --accent-bg:rgba(95,176,165,0.16);
+    --shadow:0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+    min-height:100vh; padding:clamp(16px,4vw,40px);
+  }
+  .page{ max-width:1100px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+
+  header{ display:flex; flex-direction:column; gap:6px; }
+  h1{ font-family:'Sora',sans-serif; font-weight:700; font-size:clamp(28px,4vw,38px); margin:0; text-wrap:balance; letter-spacing:-0.01em; }
+  .subtitle{ color:var(--ink-dim); font-size:14.5px; max-width:70ch; line-height:1.55; }
+  .rule{ height:2px; border-radius:2px; background:linear-gradient(90deg, var(--accent), transparent 70%); width:120px; margin-top:2px; }
+  .meta-line{ display:flex; flex-wrap:wrap; gap:8px 14px; font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.5px; color:var(--ink-dim); }
+  .meta-line b{ color:var(--ink); font-weight:600; }
+
+  main{ display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,400px); gap:20px; align-items:start; }
+  @media (max-width:860px){ main{ grid-template-columns:1fr; } }
+
+  .code-card{ background:var(--code-bg); border:1px solid var(--line); border-radius:14px; padding:14px 0; box-shadow:var(--shadow); overflow-x:auto; }
+  .code-title{ font-family:'IBM Plex Mono',Consolas,monospace; font-size:11.5px; color:var(--code-dim); padding:0 18px 10px; letter-spacing:0.04em; text-transform:uppercase; }
+  .code-line{ display:grid; grid-template-columns:36px 1fr; align-items:baseline; font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.5px; line-height:1.6; white-space:pre; border-left:3px solid transparent; transition:background 0.2s ease, border-color 0.2s ease; }
+  .code-line .gut{ color:var(--code-dim); text-align:right; padding-right:10px; user-select:none; background:var(--code-gutter); }
+  .code-line .src{ padding-left:10px; padding-right:16px; color:var(--code-ink); }
+  .code-line.active{ background:var(--code-cur-bg); border-left-color:var(--code-cur-border); }
+  .code-line.active .gut{ color:var(--code-cur-border); font-weight:600; }
+  .tok-kw{ color:var(--code-kw); }
+  .tok-str{ color:var(--code-str); }
+  .tok-num{ color:var(--code-num); font-weight:600; }
+  .tok-com{ color:var(--code-com); font-style:italic; }
+
+  .panel{ display:flex; flex-direction:column; gap:14px; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); }
+
+  .ptr-row{ display:flex; gap:10px; margin-bottom:12px; font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.5px; }
+  .ptr{ background:var(--surface-2); border:1px solid var(--line); border-radius:7px; padding:4px 9px; color:var(--ink-dim); }
+  .ptr b{ color:var(--accent-ink); }
+  .ptr.empty{ opacity:0.45; }
+
+  .lcd-frame{ background:linear-gradient(180deg, var(--lcd-frame), var(--lcd-frame-2)); border-radius:10px; padding:9px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.25); }
+  .lcd-glass{ background:linear-gradient(180deg, var(--lcd-glass), var(--lcd-glass-2)); border-radius:5px; padding:7px; overflow-x:auto; box-shadow:inset 0 2px 6px rgba(0,0,0,0.22); }
+  .lcd-rows{ display:flex; flex-direction:column; gap:2px; width:max-content; }
+  .lcd-row{ display:flex; gap:1.5px; }
+  .dot{ width:6px; height:6px; border-radius:1.5px; flex:none; }
+  .dot.on{ background:var(--lcd-on); }
+  .dot.off{ background:var(--lcd-off); opacity:0.55; }
+  .dot.unwritten{ background:var(--lcd-unwritten); opacity:0.3; }
+  .dot.cursor{ background:var(--accent); opacity:1; }
+
+  .raw-title{ font-family:'IBM Plex Mono',Consolas,monospace; font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:0.05em; margin:14px 0 6px; }
+  pre.raw{ font-family:'IBM Plex Mono',Consolas,monospace; font-size:12px; line-height:1.7; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; overflow-x:auto; color:var(--ink); margin:0; min-height:110px; white-space:pre; }
+  .cur-blink{ display:inline-block; width:6px; height:12px; background:var(--accent); vertical-align:middle; margin-left:1px; }
+  @media (prefers-reduced-motion: no-preference){ .cur-blink{ animation:blink 1s step-end infinite; } }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .console{ font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.5px; background:var(--code-bg); color:var(--code-ink); border-radius:8px; padding:10px 12px; min-height:20px; margin-top:12px; }
+  .console .c-com{ color:var(--code-com); }
+  .console .c-num{ color:var(--code-num); font-weight:600; }
+  .console .c-str{ color:var(--code-str); }
+
+  .caption-card{ display:flex; flex-direction:column; gap:6px; }
+  .caption-title{ font-family:'Sora',sans-serif; font-weight:700; font-size:15px; color:var(--accent-ink); }
+  .caption-text{ font-size:13.5px; line-height:1.55; }
+
+  .controls{ display:flex; flex-direction:column; gap:10px; }
+  .transport{ display:flex; align-items:center; gap:6px; }
+  button{ font-family:inherit; font-size:14px; font-weight:600; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:8px 10px; cursor:pointer; transition:background 0.15s ease, transform 0.1s ease; }
+  button:hover{ background:var(--accent-bg); }
+  button:active{ transform:translateY(1px); }
+  button:focus-visible, input[type="range"]:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  button.play{ flex:1; background:var(--accent); color:var(--surface); border-color:var(--accent); }
+  button.play:hover{ filter:brightness(1.08); background:var(--accent); }
+  button:disabled{ opacity:0.4; cursor:default; }
+  input[type="range"]{ width:100%; accent-color:var(--accent); }
+  .step-count{ font-family:'IBM Plex Mono',Consolas,monospace; font-size:12.5px; color:var(--ink-dim); display:flex; justify-content:space-between; }
+  .step-count b{ color:var(--ink); font-weight:600; }
+  .hint{ font-size:12px; color:var(--ink-dim); line-height:1.5; }
+  kbd{ font-family:'IBM Plex Mono',monospace; background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:11px; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Row by Row</h1>
+    <p class="subtitle">The solution to P5730 【深基5.例10】显示屏: a 10×5 pattern table indexed by digit, printed one screen-row at a time. This steps through the real trace of <code>P5730.cpp</code>, line by line, on the sample n = 10, s = "0123456789" — verified against the documented sample output.</p>
+    <div class="rule"></div>
+    <div class="meta-line">
+      <span>n = <b>10</b>, s = <b>"0123456789"</b></span>
+      <span>outer loop: row <b>r</b> = 0..4</span>
+      <span>inner loop: digit <b>i</b> = 0..n-1</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="code-card">
+      <div class="code-title">P5730.cpp</div>
+      <div id="codeBody"></div>
+    </div>
+
+    <div class="panel">
+      <div class="card">
+        <div class="ptr-row">
+          <span class="ptr" id="ptrR">row r = —</span>
+          <span class="ptr" id="ptrI">digit i = —</span>
+        </div>
+        <div class="lcd-frame">
+          <div class="lcd-glass"><div class="lcd-rows" id="lcdRows"></div></div>
+        </div>
+        <div class="raw-title">stdout so far</div>
+        <pre class="raw" id="rawOut"></pre>
+        <div class="console" id="console"></div>
+      </div>
+
+      <div class="card caption-card">
+        <div class="caption-title" id="capTitle">Ready</div>
+        <div class="caption-text" id="capText"></div>
+      </div>
+
+      <div class="card controls">
+        <div class="transport">
+          <button id="toStart" title="Jump to start">⏮</button>
+          <button id="prev" title="Previous step">◀</button>
+          <button id="play" class="play" title="Play / pause">▶ Play</button>
+          <button id="next" title="Next step">▶</button>
+          <button id="toEnd" title="Jump to end">⏭</button>
+        </div>
+        <input type="range" id="scrub" min="0" max="156" value="0" step="1">
+        <div class="step-count"><span>step</span><b id="stepLabel">0 / 156</b></div>
+        <div class="hint">Space to play/pause, <kbd>←</kbd>/<kbd>→</kbd> to step. Hold play — it moves fast on purpose.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const PATTERNS = {
+  0:['XXX','X.X','X.X','X.X','XXX'], 1:['..X','..X','..X','..X','..X'],
+  2:['XXX','..X','XXX','X..','XXX'], 3:['XXX','..X','XXX','..X','XXX'],
+  4:['X.X','X.X','XXX','..X','..X'], 5:['XXX','X..','XXX','..X','XXX'],
+  6:['XXX','X..','XXX','X.X','XXX'], 7:['XXX','..X','..X','..X','..X'],
+  8:['XXX','X.X','XXX','X.X','XXX'], 9:['XXX','X.X','XXX','..X','XXX'],
+};
+
+const N = 10, S = '0123456789';
+const ROW_WIDTH = N * 3 + (N - 1);
+
+const sourceLines = {
+  1:  `<span class="tok-kw">#include</span><span class="tok-str">&lt;bits/stdc++.h&gt;</span>`,
+  2:  ``,
+  3:  `<span class="tok-kw">#define</span> <span class="tok-kw">int</span> <span class="tok-kw">long</span> <span class="tok-kw">long</span>`,
+  4:  `<span class="tok-kw">#define</span> <span class="tok-kw">endl</span> <span class="tok-str">'\\n'</span>`,
+  5:  `<span class="tok-kw">#define</span> <span class="tok-kw">double</span> <span class="tok-kw">long</span> <span class="tok-kw">double</span>`,
+  6:  `<span class="tok-kw">#define</span> <span class="tok-kw">fast</span> ios_base::sync_with_stdio(<span class="tok-num">0</span>); cin.tie(<span class="tok-num">0</span>); cout.tie(<span class="tok-num">0</span>);`,
+  7:  `<span class="tok-kw">using</span> <span class="tok-kw">namespace</span> std;`,
+  8:  ``,
+  9:  `string pat[<span class="tok-num">10</span>][<span class="tok-num">5</span>] = {`,
+  10: `    <span class="tok-com">// … the ten 3×5 glyphs, row-major …</span>`,
+  11: `};`,
+  12: ``,
+  13: `<span class="tok-kw">signed</span> main(){`,
+  14: `    fast;`,
+  15: `    <span class="tok-kw">int</span> n;`,
+  16: `    string s;`,
+  17: `    cin &gt;&gt; n &gt;&gt; s;`,
+  18: ``,
+  19: `    <span class="tok-kw">for</span>(<span class="tok-kw">int</span> r=<span class="tok-num">0</span>;r&lt;<span class="tok-num">5</span>;r++){`,
+  20: `        <span class="tok-kw">for</span>(<span class="tok-kw">int</span> i=<span class="tok-num">0</span>;i&lt;n;i++){`,
+  21: `            <span class="tok-kw">if</span>(i) cout &lt;&lt; <span class="tok-str">'.'</span>;`,
+  22: `            cout &lt;&lt; pat[s[i]-<span class="tok-str">'0'</span>][r];`,
+  23: `        }`,
+  24: `        cout &lt;&lt; endl;`,
+  25: `    }`,
+  26: ``,
+  27: `    <span class="tok-kw">return</span> <span class="tok-num">0</span>;`,
+  28: `}`,
+};
+// map traced line numbers (from the instrumented copy) onto this display copy
+const LINE_MAP = { 24:17, 26:19, 27:20, 28:21, 29:22, 31:24 };
+
+const codeBody = document.getElementById('codeBody');
+const lineEls = {};
+for (let n = 1; n <= 28; n++) {
+  const row = document.createElement('div');
+  row.className = 'code-line';
+  row.innerHTML = `<span class="gut">${n}</span><span class="src">${sourceLines[n] || ''}</span>`;
+  codeBody.appendChild(row);
+  lineEls[n] = row;
+}
+
+const lcdRows = document.getElementById('lcdRows');
+const rowEls = [];
+for (let r = 0; r < 5; r++) {
+  const row = document.createElement('div');
+  row.className = 'lcd-row';
+  const dots = [];
+  for (let c = 0; c < ROW_WIDTH; c++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot unwritten';
+    row.appendChild(dot);
+    dots.push(dot);
+  }
+  lcdRows.appendChild(row);
+  rowEls.push(dots);
+}
+
+const frames = [{"line":24,"type":"read","n":10,"s":"0123456789"},{"line":26,"type":"row_start","r":0},{"line":27,"type":"col_start","r":0,"i":0,"digit":0},{"line":29,"type":"emit","r":0,"i":0,"digit":0,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":1,"digit":1},{"line":28,"type":"sep","r":0,"i":1},{"line":29,"type":"emit","r":0,"i":1,"digit":1,"glyph":"..X"},{"line":27,"type":"col_start","r":0,"i":2,"digit":2},{"line":28,"type":"sep","r":0,"i":2},{"line":29,"type":"emit","r":0,"i":2,"digit":2,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":3,"digit":3},{"line":28,"type":"sep","r":0,"i":3},{"line":29,"type":"emit","r":0,"i":3,"digit":3,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":4,"digit":4},{"line":28,"type":"sep","r":0,"i":4},{"line":29,"type":"emit","r":0,"i":4,"digit":4,"glyph":"X.X"},{"line":27,"type":"col_start","r":0,"i":5,"digit":5},{"line":28,"type":"sep","r":0,"i":5},{"line":29,"type":"emit","r":0,"i":5,"digit":5,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":6,"digit":6},{"line":28,"type":"sep","r":0,"i":6},{"line":29,"type":"emit","r":0,"i":6,"digit":6,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":7,"digit":7},{"line":28,"type":"sep","r":0,"i":7},{"line":29,"type":"emit","r":0,"i":7,"digit":7,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":8,"digit":8},{"line":28,"type":"sep","r":0,"i":8},{"line":29,"type":"emit","r":0,"i":8,"digit":8,"glyph":"XXX"},{"line":27,"type":"col_start","r":0,"i":9,"digit":9},{"line":28,"type":"sep","r":0,"i":9},{"line":29,"type":"emit","r":0,"i":9,"digit":9,"glyph":"XXX"},{"line":31,"type":"row_end","r":0},{"line":26,"type":"row_start","r":1},{"line":27,"type":"col_start","r":1,"i":0,"digit":0},{"line":29,"type":"emit","r":1,"i":0,"digit":0,"glyph":"X.X"},{"line":27,"type":"col_start","r":1,"i":1,"digit":1},{"line":28,"type":"sep","r":1,"i":1},{"line":29,"type":"emit","r":1,"i":1,"digit":1,"glyph":"..X"},{"line":27,"type":"col_start","r":1,"i":2,"digit":2},{"line":28,"type":"sep","r":1,"i":2},{"line":29,"type":"emit","r":1,"i":2,"digit":2,"glyph":"..X"},{"line":27,"type":"col_start","r":1,"i":3,"digit":3},{"line":28,"type":"sep","r":1,"i":3},{"line":29,"type":"emit","r":1,"i":3,"digit":3,"glyph":"..X"},{"line":27,"type":"col_start","r":1,"i":4,"digit":4},{"line":28,"type":"sep","r":1,"i":4},{"line":29,"type":"emit","r":1,"i":4,"digit":4,"glyph":"X.X"},{"line":27,"type":"col_start","r":1,"i":5,"digit":5},{"line":28,"type":"sep","r":1,"i":5},{"line":29,"type":"emit","r":1,"i":5,"digit":5,"glyph":"X.."},{"line":27,"type":"col_start","r":1,"i":6,"digit":6},{"line":28,"type":"sep","r":1,"i":6},{"line":29,"type":"emit","r":1,"i":6,"digit":6,"glyph":"X.."},{"line":27,"type":"col_start","r":1,"i":7,"digit":7},{"line":28,"type":"sep","r":1,"i":7},{"line":29,"type":"emit","r":1,"i":7,"digit":7,"glyph":"..X"},{"line":27,"type":"col_start","r":1,"i":8,"digit":8},{"line":28,"type":"sep","r":1,"i":8},{"line":29,"type":"emit","r":1,"i":8,"digit":8,"glyph":"X.X"},{"line":27,"type":"col_start","r":1,"i":9,"digit":9},{"line":28,"type":"sep","r":1,"i":9},{"line":29,"type":"emit","r":1,"i":9,"digit":9,"glyph":"X.X"},{"line":31,"type":"row_end","r":1},{"line":26,"type":"row_start","r":2},{"line":27,"type":"col_start","r":2,"i":0,"digit":0},{"line":29,"type":"emit","r":2,"i":0,"digit":0,"glyph":"X.X"},{"line":27,"type":"col_start","r":2,"i":1,"digit":1},{"line":28,"type":"sep","r":2,"i":1},{"line":29,"type":"emit","r":2,"i":1,"digit":1,"glyph":"..X"},{"line":27,"type":"col_start","r":2,"i":2,"digit":2},{"line":28,"type":"sep","r":2,"i":2},{"line":29,"type":"emit","r":2,"i":2,"digit":2,"glyph":"XXX"},{"line":27,"type":"col_start","r":2,"i":3,"digit":3},{"line":28,"type":"sep","r":2,"i":3},{"line":29,"type":"emit","r":2,"i":3,"digit":3,"glyph":"XXX"},{"line":27,"type":"col_start","r":2,"i":4,"digit":4},{"line":28,"type":"sep","r":2,"i":4},{"line":29,"type":"emit","r":2,"i":4,"digit":4,"glyph":"XXX"},{"line":27,"type":"col_start","r":2,"i":5,"digit":5},{"line":28,"type":"sep","r":2,"i":5},{"line":29,"type":"emit","r":2,"i":5,"digit":5,"glyph":"XXX"},{"line":27,"type":"col_start","r":2,"i":6,"digit":6},{"line":28,"type":"sep","r":2,"i":6},{"line":29,"type":"emit","r":2,"i":6,"digit":6,"glyph":"XXX"},{"line":27,"type":"col_start","r":2,"i":7,"digit":7},{"line":28,"type":"sep","r":2,"i":7},{"line":29,"type":"emit","r":2,"i":7,"digit":7,"glyph":"..X"},{"line":27,"type":"col_start","r":2,"i":8,"digit":8},{"line":28,"type":"sep","r":2,"i":8},{"line":29,"type":"emit","r":2,"i":8,"digit":8,"glyph":"XXX"},{"line":27,"type":"col_start","r":2,"i":9,"digit":9},{"line":28,"type":"sep","r":2,"i":9},{"line":29,"type":"emit","r":2,"i":9,"digit":9,"glyph":"XXX"},{"line":31,"type":"row_end","r":2},{"line":26,"type":"row_start","r":3},{"line":27,"type":"col_start","r":3,"i":0,"digit":0},{"line":29,"type":"emit","r":3,"i":0,"digit":0,"glyph":"X.X"},{"line":27,"type":"col_start","r":3,"i":1,"digit":1},{"line":28,"type":"sep","r":3,"i":1},{"line":29,"type":"emit","r":3,"i":1,"digit":1,"glyph":"..X"},{"line":27,"type":"col_start","r":3,"i":2,"digit":2},{"line":28,"type":"sep","r":3,"i":2},{"line":29,"type":"emit","r":3,"i":2,"digit":2,"glyph":"X.."},{"line":27,"type":"col_start","r":3,"i":3,"digit":3},{"line":28,"type":"sep","r":3,"i":3},{"line":29,"type":"emit","r":3,"i":3,"digit":3,"glyph":"..X"},{"line":27,"type":"col_start","r":3,"i":4,"digit":4},{"line":28,"type":"sep","r":3,"i":4},{"line":29,"type":"emit","r":3,"i":4,"digit":4,"glyph":"..X"},{"line":27,"type":"col_start","r":3,"i":5,"digit":5},{"line":28,"type":"sep","r":3,"i":5},{"line":29,"type":"emit","r":3,"i":5,"digit":5,"glyph":"..X"},{"line":27,"type":"col_start","r":3,"i":6,"digit":6},{"line":28,"type":"sep","r":3,"i":6},{"line":29,"type":"emit","r":3,"i":6,"digit":6,"glyph":"X.X"},{"line":27,"type":"col_start","r":3,"i":7,"digit":7},{"line":28,"type":"sep","r":3,"i":7},{"line":29,"type":"emit","r":3,"i":7,"digit":7,"glyph":"..X"},{"line":27,"type":"col_start","r":3,"i":8,"digit":8},{"line":28,"type":"sep","r":3,"i":8},{"line":29,"type":"emit","r":3,"i":8,"digit":8,"glyph":"X.X"},{"line":27,"type":"col_start","r":3,"i":9,"digit":9},{"line":28,"type":"sep","r":3,"i":9},{"line":29,"type":"emit","r":3,"i":9,"digit":9,"glyph":"..X"},{"line":31,"type":"row_end","r":3},{"line":26,"type":"row_start","r":4},{"line":27,"type":"col_start","r":4,"i":0,"digit":0},{"line":29,"type":"emit","r":4,"i":0,"digit":0,"glyph":"XXX"},{"line":27,"type":"col_start","r":4,"i":1,"digit":1},{"line":28,"type":"sep","r":4,"i":1},{"line":29,"type":"emit","r":4,"i":1,"digit":1,"glyph":"..X"},{"line":27,"type":"col_start","r":4,"i":2,"digit":2},{"line":28,"type":"sep","r":4,"i":2},{"line":29,"type":"emit","r":4,"i":2,"digit":2,"glyph":"XXX"},{"line":27,"type":"col_start","r":4,"i":3,"digit":3},{"line":28,"type":"sep","r":4,"i":3},{"line":29,"type":"emit","r":4,"i":3,"digit":3,"glyph":"XXX"},{"line":27,"type":"col_start","r":4,"i":4,"digit":4},{"line":28,"type":"sep","r":4,"i":4},{"line":29,"type":"emit","r":4,"i":4,"digit":4,"glyph":"..X"},{"line":27,"type":"col_start","r":4,"i":5,"digit":5},{"line":28,"type":"sep","r":4,"i":5},{"line":29,"type":"emit","r":4,"i":5,"digit":5,"glyph":"XXX"},{"line":27,"type":"col_start","r":4,"i":6,"digit":6},{"line":28,"type":"sep","r":4,"i":6},{"line":29,"type":"emit","r":4,"i":6,"digit":6,"glyph":"XXX"},{"line":27,"type":"col_start","r":4,"i":7,"digit":7},{"line":28,"type":"sep","r":4,"i":7},{"line":29,"type":"emit","r":4,"i":7,"digit":7,"glyph":"..X"},{"line":27,"type":"col_start","r":4,"i":8,"digit":8},{"line":28,"type":"sep","r":4,"i":8},{"line":29,"type":"emit","r":4,"i":8,"digit":8,"glyph":"XXX"},{"line":27,"type":"col_start","r":4,"i":9,"digit":9},{"line":28,"type":"sep","r":4,"i":9},{"line":29,"type":"emit","r":4,"i":9,"digit":9,"glyph":"XXX"},{"line":31,"type":"row_end","r":4}];
+const TOTAL = frames.length;
+
+function buildState(idx) {
+  const completedRows = [];
+  let outBuf = '';
+  let curR = null, curI = null, curDigit = null;
+  for (let k = 0; k < idx; k++) {
+    const f = frames[k];
+    if (f.type === 'row_start') { outBuf = ''; curR = f.r; curI = null; curDigit = null; }
+    else if (f.type === 'col_start') { curI = f.i; curDigit = f.digit; }
+    else if (f.type === 'sep') { outBuf += '.'; }
+    else if (f.type === 'emit') { outBuf += f.glyph; }
+    else if (f.type === 'row_end') { completedRows.push(outBuf); }
+  }
+  return { completedRows, outBuf, curR, curI, curDigit };
+}
+
+function describe(idx) {
+  if (idx === 0) return { title: 'Ready', text: 'Step forward to read the input and start printing.' };
+  const f = frames[idx - 1];
+  switch (f.type) {
+    case 'read': return { title: 'Read input', text: `n = ${f.n}, s = "${f.s}".` };
+    case 'row_start': return { title: `Row r = ${f.r}`, text: `Sweep across all ${N} digits, printing row ${f.r} of each one's glyph.` };
+    case 'col_start': return { title: `i = ${f.i}, digit '${f.digit}'`, text: `Look up pat[${f.digit}][${f.r}] — the digit's own glyph table doesn't change with i, only which digit is selected does.` };
+    case 'sep': return { title: 'Separator', text: `i > 0, so a '.' column prints before this digit's glyph — that's the one-column gap between digits.` };
+    case 'emit': return { title: `Print "${f.glyph}"`, text: `pat[${f.digit}][${f.r}] = "${f.glyph}" is written to stdout.` };
+    case 'row_end': return { title: `Row ${f.r} done`, text: `Newline. ${f.r < 4 ? `Next: row ${f.r + 1}.` : 'That was the last row — output complete.'}` };
+  }
+}
+
+function consoleLine(idx) {
+  if (idx === 0) return `<span class="c-com">// waiting to start</span>`;
+  const f = frames[idx - 1];
+  switch (f.type) {
+    case 'read': return `cin &gt;&gt; n &gt;&gt; s;  <span class="c-com">// n=<span class="c-num">${f.n}</span>, s=<span class="c-str">"${f.s}"</span></span>`;
+    case 'row_start': return `for (r = <span class="c-num">${f.r}</span>; r &lt; 5; r++)`;
+    case 'col_start': return `for (i = <span class="c-num">${f.i}</span>; i &lt; n; i++)  <span class="c-com">// s[i]='${f.digit}'</span>`;
+    case 'sep': return `cout &lt;&lt; <span class="c-str">'.'</span>;`;
+    case 'emit': return `cout &lt;&lt; pat[<span class="c-num">${f.digit}</span>][<span class="c-num">${f.r}</span>];  <span class="c-com">// "${f.glyph}"</span>`;
+    case 'row_end': return `cout &lt;&lt; endl;`;
+  }
+}
+
+let idx = 0, playing = false, timer = null;
+
+function render() {
+  const st = buildState(idx);
+  const f = idx > 0 ? frames[idx - 1] : null;
+  const displayLine = f ? LINE_MAP[f.line] : null;
+
+  for (let n = 1; n <= 28; n++) lineEls[n].classList.toggle('active', displayLine === n);
+
+  document.getElementById('ptrR').innerHTML = st.curR === null ? 'row r = —' : `row r = <b>${st.curR}</b>`;
+  document.getElementById('ptrR').classList.toggle('empty', st.curR === null);
+  document.getElementById('ptrI').innerHTML = st.curI === null ? 'digit i = —' : `digit i = <b>${st.curI}</b> ('${st.curDigit}')`;
+  document.getElementById('ptrI').classList.toggle('empty', st.curI === null);
+
+  for (let r = 0; r < 5; r++) {
+    const text = r < st.completedRows.length ? st.completedRows[r] : (r === st.curR ? st.outBuf : null);
+    for (let c = 0; c < ROW_WIDTH; c++) {
+      const dot = rowEls[r][c];
+      if (text === null) { dot.className = 'dot unwritten'; }
+      else if (c < text.length) { dot.className = 'dot ' + (text[c] === 'X' ? 'on' : 'off'); }
+      else { dot.className = 'dot unwritten'; }
+    }
+  }
+
+  const lines = st.completedRows.slice();
+  let raw = lines.join('\n');
+  if (st.curR !== null && st.curR >= st.completedRows.length) {
+    raw += (lines.length ? '\n' : '') + st.outBuf;
+  }
+  const rawEl = document.getElementById('rawOut');
+  rawEl.textContent = raw;
+  if (idx > 0 && idx < TOTAL) {
+    const cursor = document.createElement('span');
+    cursor.className = 'cur-blink';
+    rawEl.appendChild(cursor);
+  }
+
+  const { title, text } = describe(idx);
+  document.getElementById('capTitle').textContent = title;
+  document.getElementById('capText').textContent = text;
+  document.getElementById('console').innerHTML = consoleLine(idx);
+  document.getElementById('stepLabel').textContent = `${idx} / ${TOTAL}`;
+  document.getElementById('scrub').value = idx;
+  document.getElementById('prev').disabled = idx === 0;
+  document.getElementById('toStart').disabled = idx === 0;
+  document.getElementById('next').disabled = idx === TOTAL;
+  document.getElementById('toEnd').disabled = idx === TOTAL;
+}
+
+function setIdx(v) { idx = Math.max(0, Math.min(TOTAL, v)); render(); }
+function stop() { playing = false; clearInterval(timer); document.getElementById('play').textContent = '▶ Play'; }
+function play() {
+  if (idx >= TOTAL) idx = 0;
+  playing = true;
+  document.getElementById('play').textContent = '⏸ Pause';
+  timer = setInterval(() => { if (idx >= TOTAL) { stop(); return; } setIdx(idx + 1); }, 140);
+}
+
+document.getElementById('prev').addEventListener('click', () => { stop(); setIdx(idx - 1); });
+document.getElementById('next').addEventListener('click', () => { stop(); setIdx(idx + 1); });
+document.getElementById('toStart').addEventListener('click', () => { stop(); setIdx(0); });
+document.getElementById('toEnd').addEventListener('click', () => { stop(); setIdx(TOTAL); });
+document.getElementById('play').addEventListener('click', () => { playing ? stop() : play(); });
+document.getElementById('scrub').addEventListener('input', (e) => { stop(); setIdx(parseInt(e.target.value, 10)); });
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); playing ? stop() : play(); }
+  else if (e.code === 'ArrowRight') { stop(); setIdx(idx + 1); }
+  else if (e.code === 'ArrowLeft') { stop(); setIdx(idx - 1); }
+});
+
+render();
+</script>
+
+</body></html>

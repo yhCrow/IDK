@@ -1,6 +1,6 @@
 # CP Learning Hub
 
-Solved competitive programming problems, each with the full C++ solution and a link to its interactive step-by-step demo.
+Solved competitive programming problems. Each project page has an interactive step-by-step demo built into the page, followed by the full C++ solution.
 
 Live site: **https://yhcrow.github.io/IDK/**
 
@@ -29,7 +29,8 @@ python3 -m http.server 8000
 ## Adding a project
 
 1. Write the explanation and code in a Markdown file, e.g. `site/content/projects/p1216.md`. You can use `$maths$`, `$$display maths$$`, tables and ` ```cpp ` code blocks.
-2. Add an entry to `site/content/projects.json`:
+2. Put the interactive demo, a self-contained HTML page, in `site/demos/`, e.g. `site/demos/p1216.html`.
+3. Add an entry to `site/content/projects.json`:
 
 ```json
 {
@@ -40,7 +41,7 @@ python3 -m http.server 8000
   "tags": ["DP"],
   "file": "p1216.md",
   "demos": [
-    { "name": "Demo name", "url": "https://claude.ai/artifact/...", "desc": "What the demo shows." }
+    { "name": "Demo name", "page": "demos/p1216.html", "desc": "What the demo shows." }
   ]
 }
 ```
@@ -49,5 +50,5 @@ Projects appear on the home page in the order they are listed.
 
 ## Notes
 
-- The demo links point to Claude artifacts, which are private until you share them from each artifact's Share menu.
+- The demos in `site/demos/` are copies of the original interactive artifacts, so they work for every visitor. Each also opens on its own page with **Open full page**.
 - Libraries are bundled in `site/vendor/` (marked, KaTeX, highlight.js), so the site does not depend on outside CDNs.
