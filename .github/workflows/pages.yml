@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check content JSON is valid
-        run: for f in site/content/subjects.json site/content/*/cards.json; do python3 -m json.tool "$f" > /dev/null || exit 1; done
+        run: python3 -m json.tool site/content/projects.json > /dev/null
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

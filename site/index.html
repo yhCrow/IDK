@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CP Learning Hub</title>
-  <meta name="description" content="Competitive programming notes, solved Luogu problems with C++ code, flashcards, quizzes and a cheat sheet.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f6fdf'/%3E%3Cpath d='M9 9h9a5 5 0 0 1 0 10h-5v5H9z' fill='white'/%3E%3C/svg%3E">
+  <meta name="description" content="Solved competitive programming problems with full C++ code and interactive step-by-step demos.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238a46c9'/%3E%3Cpath d='M9 9h9a5 5 0 0 1 0 10h-5v5H9z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/katex/katex.min.css">
   <link rel="stylesheet" href="assets/style.css">
   <script>
@@ -21,9 +21,6 @@
   <header class="site-header">
     <div class="header-inner">
       <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true">CP</span>CP Learning Hub</a>
-      <form id="search-form" class="search" role="search">
-        <input type="search" id="search-input" placeholder="Search notes & cards…" aria-label="Search notes and flashcards" autocomplete="off">
-      </form>
       <div class="header-actions">
         <button id="theme-toggle" class="icon-btn" type="button" title="Toggle dark mode" aria-label="Toggle dark mode">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
@@ -35,7 +32,7 @@
   <main id="app" tabindex="-1"></main>
 
   <footer class="site-footer">
-    Add your own notes in <code>site/content/</code> — see the README for how.
+    Add a project in <code>site/content/projects.json</code> — see the README for how.
   </footer>
 
   <script src="vendor/marked.min.js" defer></script>

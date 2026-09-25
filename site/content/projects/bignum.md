@@ -1,4 +1,4 @@
-# 3.5 High-Precision Arithmetic 高精度运算
+# High-Precision Arithmetic 高精度运算
 
 When numbers go past `long long` (about $9.2 \times 10^{18}$), store them as **arrays of digits** and do the arithmetic by hand, the same way as column arithmetic on paper.
 
@@ -142,10 +142,6 @@ a / 7 = 17636684144620811271604938270 remainder 0
 ```
 
 All four results match Python's exact integer arithmetic.
-
-## Interactive version
-
-- [高精度运算演示](https://claude.ai/artifact/Dz2rjQPJqcvANCkkwgVohy) — steps through `add()`, `mul()`, `sub()` and `divInt()` line by line, showing every carry, borrow and remainder.
 
 ## Practice problems
 

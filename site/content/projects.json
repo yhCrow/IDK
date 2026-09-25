@@ -1,0 +1,60 @@
+{
+  "projects": [
+    {
+      "id": "p5730",
+      "code": "P5730",
+      "title": "显示屏 · LCD Digits",
+      "summary": "Draw a string of digits on a 3×5 dot display, printed one screen row at a time from a glyph table.",
+      "tags": ["Simulation", "Strings"],
+      "file": "p5730.md",
+      "demos": [
+        { "name": "LCD Digits", "url": "https://claude.ai/artifact/Y84zcJzZECk49UMi2RLeBT", "desc": "Type any digits and see the display and the exact text output." },
+        { "name": "Row by Row", "url": "https://claude.ai/artifact/8LFqKUnXCuME4wM9JftbyH", "desc": "Steps through the solution line by line on the sample." }
+      ]
+    },
+    {
+      "id": "p1028",
+      "code": "P1028",
+      "title": "数的计算 · Half Prefix",
+      "summary": "Count the numbers you can build by prefixing digits at most half the current front, using a one-line DP.",
+      "tags": ["DP", "Recursion"],
+      "file": "p1028.md",
+      "demos": [
+        { "name": "Half Prefix", "url": "https://claude.ai/artifact/Fu58e6q8jtCdf8tH77YqZq", "desc": "A step-by-step trace of the code filling dp[]." }
+      ]
+    },
+    {
+      "id": "p1002",
+      "code": "P1002",
+      "title": "过河卒 · River Pawn",
+      "summary": "Count right/down paths across a grid while avoiding a horse and every square it can jump to.",
+      "tags": ["DP", "Grid"],
+      "file": "p1002.md",
+      "demos": [
+        { "name": "River Pawn", "url": "https://claude.ai/artifact/J9fuZcWC5WQSQRwAJsRuha", "desc": "Set your own board and watch the DP table fill in." }
+      ]
+    },
+    {
+      "id": "p1044",
+      "code": "P1044",
+      "title": "栈 · Stack Permutations",
+      "summary": "Count the possible stack output orders — the Catalan numbers — with two proofs of the recurrence.",
+      "tags": ["DP", "Catalan", "Stack"],
+      "file": "p1044.md",
+      "demos": [
+        { "name": "Stack Permutation Trace", "url": "https://claude.ai/artifact/SohpNrr3oEmQzi1oBpCiDM", "desc": "The execution trace, plus all 5 sequences for n = 3 grouped by when element 1 leaves." }
+      ]
+    },
+    {
+      "id": "bignum",
+      "code": "高精度",
+      "title": "High-Precision Arithmetic",
+      "summary": "Add, subtract, multiply and divide numbers far bigger than long long, digit by digit with carries and borrows.",
+      "tags": ["Big numbers", "Implementation"],
+      "file": "bignum.md",
+      "demos": [
+        { "name": "高精度运算演示", "url": "https://claude.ai/artifact/Dz2rjQPJqcvANCkkwgVohy", "desc": "Steps through add(), mul(), sub() and divInt() showing every carry, borrow and remainder." }
+      ]
+    }
+  ]
+}
